@@ -1,0 +1,36 @@
+NOTICE
+
+Binflare is an independent, clean-room
+reimplementation of the zero-knowledge pastebin concept, written from
+scratch for Cloudflare Workers. No source code from the upstream
+project has been copied.
+
+Upstream attribution
+--------------------
+This project was inspired by PrivateBin:
+
+  - Repository:   https://github.com/PrivateBin/PrivateBin
+  - Organization: @PrivateBin
+  - Original author: Sebastien Sauvage
+  - Copyright (c) Sebastien Sauvage and the PrivateBin contributors
+  - Upstream license: Zlib/libpng
+    (https://github.com/PrivateBin/PrivateBin/blob/master/LICENSE.md)
+
+PrivateBin is a minimalist, open source online pastebin where the
+server has zero knowledge of pasted data. This reimplementation follows
+the same zero-knowledge principle (client-side encryption, key carried
+only in the URL #fragment) but shares no code, no data format and no
+assets with upstream. In particular, none of upstream's bundled
+third-party libraries are used (including the GPLv2-licensed
+rawinflate), and upstream's CC-BY-licensed logo/artwork is not used.
+
+Data-format incompatibility
+---------------------------
+Pastes created by this project cannot be opened by upstream PrivateBin,
+and upstream pastes cannot be opened here. The client-side encryption
+formats differ. This is a new implementation, not a migration tool.
+
+Non-affiliation
+---------------
+This project is not affiliated with, endorsed by, or an official port
+of the PrivateBin project.
