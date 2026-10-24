@@ -6,7 +6,7 @@ Pastes are encrypted in your browser (AES-256-GCM via WebCrypto) before they are
 
 > 🚧 **Status: stage 0 — project scaffolding.** Core implementation in progress. This repository is private during incubation and will be made public at v0.1.
 
-零知识加密粘贴板，跑在 Cloudflare Workers + KV 上：浏览器端加密，服务端只存密文，没有服务器要维护。
+零知识加密粘贴板，跑在 Cloudflare Workers + D1 上：浏览器端加密，服务端只存密文，没有服务器要维护。
 
 ## Upstream & attribution
 
@@ -26,13 +26,14 @@ This is **not a fork** of PrivateBin, **not an official port**, and it is **not 
 
 - Encryption happens **client-side only** (WebCrypto, AES-256-GCM). The key is generated in the browser and carried in the URL `#fragment`, which browsers never send to servers.
 - The server stores ciphertext + metadata only (expiry, burn flag, delete-token hash — tokens are stored as SHA-256 hashes, never in plain text).
-- Burn-after-reading pastes are deleted on first successful read; expiry is enforced natively by KV TTL.
+- Storage is Cloudflare D1 (SQLite) with **strong consistency**: a paste is readable everywhere the moment it is created. Burn-after-reading is a single atomic `DELETE … RETURNING` statement — exactly one reader can ever retrieve a burn paste. Expiry is checked on every read, and a scheduled cleanup job reclaims storage.
 
 ### Limitations (stated honestly)
 
-- **KV is eventually consistent**: a freshly created paste may briefly 404 in some regions, and burn-after-reading has a theoretical race under truly concurrent first reads. A strict-atomicity mode based on Durable Objects is on the roadmap.
-- **Minimum expiry is 60 seconds** (KV `expirationTtl` floor).
-- **Cloudflare free-tier write quota is 1,000 KV writes/day** — plenty for a personal self-hosted instance (one deployment = one quota); public demo instances need rate limiting.
+- **Maximum paste size is 2 MB** (D1's per-row limit — the same default size limit as upstream PrivateBin). Larger payloads and attachments belong in R2, not the database (planned, see roadmap).
+- **D1 has no native TTL**: expired pastes always return 404 on read (expiry is checked per request), but physical deletion happens in a scheduled cleanup job — an expired paste's ciphertext may sit in storage until the next cleanup run.
+- **The D1 primary lives in a single region**: reads far from that region pay a round trip (typically tens to a few hundred milliseconds). Pastes are read-once cold data, so this is a deliberate trade for strong consistency and atomic burns.
+- **Free-tier envelope**: 100,000 rows written/day, 5 million rows read/day, 500 MB per database (5 GB per account) — ample for a personal self-hosted instance (one deployment = one quota); public demo instances still need rate limiting.
 
 ## Roadmap
 
