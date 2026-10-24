@@ -1,13 +1,13 @@
 NOTICE
 
-Binflare is an independent, clean-room
-reimplementation of the zero-knowledge pastebin concept, written from
-scratch for Cloudflare Workers. No source code from the upstream
-project has been copied.
+Binflare is an independent reimplementation of the PrivateBin protocol,
+written for Cloudflare Workers. No source code or assets from the
+upstream project have been copied.
 
 Upstream attribution
 --------------------
-This project was inspired by PrivateBin:
+Protocol baseline and behavioral reference: PrivateBin 2.1.0
+(reference checkout 2.1.0-83-ga88aa802)
 
   - Repository:   https://github.com/PrivateBin/PrivateBin
   - Organization: @PrivateBin
@@ -17,20 +17,22 @@ This project was inspired by PrivateBin:
     (https://github.com/PrivateBin/PrivateBin/blob/master/LICENSE.md)
 
 PrivateBin is a minimalist, open source online pastebin where the
-server has zero knowledge of pasted data. This reimplementation follows
-the same zero-knowledge principle (client-side encryption, key carried
-only in the URL #fragment) but shares no code, no data format and no
-assets with upstream. In particular, none of upstream's bundled
-third-party libraries are used (including the GPLv2-licensed
-rawinflate), and upstream's CC-BY-licensed logo/artwork is not used.
+server has zero knowledge of pasted data. Binflare implements the v2
+wire format and JSON API independently, using modern browser APIs. It
+does not use upstream's bundled third-party libraries (including the
+GPLv2-licensed rawinflate) or upstream's CC-BY-licensed artwork.
 
-Data-format incompatibility
----------------------------
-Pastes created by this project cannot be opened by upstream PrivateBin,
-and upstream pastes cannot be opened here. The client-side encryption
-formats differ. This is a new implementation, not a migration tool.
+Compatibility scope
+-------------------
+Binflare is protocol-compatible with PrivateBin 2.1.0's v2 format for
+newly created pastes and comments. It does not support PrivateBin v1 or
+ZeroBin, and it does not import or migrate data from an existing
+instance. Protocol compatibility is not a claim of data migration or
+drop-in replacement for an existing database.
 
 Non-affiliation
 ---------------
-This project is not affiliated with, endorsed by, or an official port
-of the PrivateBin project.
+Binflare is NOT affiliated with, endorsed by, or an official port or
+distribution of the PrivateBin project. The "PrivateBin" name and
+project belong to their respective owners. Binflare uses its own name,
+logo and visual identity.

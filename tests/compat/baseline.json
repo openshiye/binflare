@@ -1,0 +1,8 @@
+{
+  "project": "PrivateBin",
+  "releaseTag": "2.1.0",
+  "referenceCommit": "a88aa802a58bc4c93c8cd4b6623e7b9c99d3105c",
+  "referenceDescribe": "2.1.0-83-ga88aa802",
+  "harnessSource": "git archive 2.1.0",
+  "note": "Protocol fixtures must be generated from the release tag, not the reference checkout's later commits."
+}
