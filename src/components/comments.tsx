@@ -4,6 +4,7 @@ import { postComment } from '../lib/api-client'
 import { linkifyText } from '../lib/linkify'
 import { formatCreated } from '../lib/format'
 import { TurnstileWidget } from './turnstile'
+import { useI18n } from '../lib/i18n'
 
 export interface DecryptedComment {
   id: string
@@ -12,6 +13,30 @@ export interface DecryptedComment {
   text: string
   nickname?: string
   error?: boolean
+}
+
+function CommentAvatar({ id }: { id: string }) {
+  const cells: Array<[number, number]> = []
+  for (let row = 0; row < 5; row++) {
+    for (let column = 0; column < 3; column++) {
+      const value = Number.parseInt(id[(row * 3 + column) % id.length] ?? '0', 16)
+      if (value % 2 === 0) {
+        cells.push([column, row])
+        if (column !== 2) {
+          cells.push([4 - column, row])
+        }
+      }
+    }
+  }
+  const color = `#${id.slice(0, 6)}`
+  return (
+    <svg className="comment-avatar" viewBox="0 0 5 5" aria-hidden="true">
+      <rect width="5" height="5" fill="transparent" />
+      {cells.map(([x, y]) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={color} />
+      ))}
+    </svg>
+  )
 }
 
 function CommentForm({
@@ -37,6 +62,7 @@ function CommentForm({
   const [error, setError] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const [turnstileKey, setTurnstileKey] = useState(0)
+  const { t } = useI18n()
 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -70,7 +96,7 @@ function CommentForm({
   return (
     <form className="comment-form" onSubmit={submit}>
       <label className="field compact">
-        <span>Nickname (optional)</span>
+        <span>{t('Nickname (optional)')}</span>
         <input
           value={nickname}
           onChange={(event) => setNickname(event.target.value)}
@@ -79,24 +105,24 @@ function CommentForm({
         />
       </label>
       <label className="field">
-        <span>Comment</span>
+        <span>{t('Comment')}</span>
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
           rows={4}
           spellCheck={false}
-          placeholder="Write a comment…"
+          placeholder={t('Write a comment…')}
         />
       </label>
       {siteKey ? <TurnstileWidget key={turnstileKey} siteKey={siteKey} onToken={setTurnstileToken} /> : null}
       {error ? <div className="alert error" role="alert">{error}</div> : null}
       <div className="form-actions">
         <button type="submit" className="button primary small" disabled={busy || text.trim().length === 0}>
-          {busy ? 'Posting…' : 'Post comment'}
+          {busy ? t('Posting…') : t('Post comment')}
         </button>
         {onCancel ? (
           <button type="button" className="button ghost small" onClick={onCancel} disabled={busy}>
-            Cancel
+            {t('Cancel')}
           </button>
         ) : null}
       </div>
@@ -126,6 +152,7 @@ function CommentThread({
   seen: Set<string>
 }) {
   const [replying, setReplying] = useState(false)
+  const { t } = useI18n()
   if (seen.has(comment.id)) {
     return null
   }
@@ -135,21 +162,22 @@ function CommentThread({
   return (
     <li className="comment" style={{ marginLeft: depth === 0 ? 0 : '1.25rem' }}>
       <div className="comment-meta">
+        <CommentAvatar id={comment.id} />
         <strong className={comment.nickname ? '' : 'anonymous'}>
-          {comment.nickname || 'Anonymous'}
+          {comment.nickname || t('Anonymous')}
         </strong>
         {comment.created ? <time dateTime={new Date(comment.created * 1000).toISOString()}>{formatCreated(comment.created)}</time> : null}
       </div>
       <div className="comment-body">
         {comment.error ? (
-          <span className="muted">[Unable to decrypt this comment]</span>
+          <span className="muted">{t('[Unable to decrypt this comment]')}</span>
         ) : (
           <span className="whitespace-pre-wrap">{linkifyText(comment.text)}</span>
         )}
       </div>
       {!comment.error ? (
         <button type="button" className="button ghost tiny" onClick={() => setReplying((value) => !value)}>
-          {replying ? 'Close reply' : 'Reply'}
+          {replying ? t('Close reply') : t('Reply')}
         </button>
       ) : null}
       {replying ? (
@@ -209,13 +237,14 @@ export function Comments({
     }
     return { roots: map.get(pasteId) ?? [], childrenByParent: map }
   }, [comments, pasteId])
+  const { t } = useI18n()
 
   return (
     <section className="discussion" aria-labelledby="discussion-title">
       <div className="section-heading">
-        <h2 id="discussion-title">Discussion</h2>
+        <h2 id="discussion-title">{t('Discussion')}</h2>
         <span className="muted small">
-          {comments.length} comment{comments.length === 1 ? '' : 's'}
+          {comments.length} {comments.length === 1 ? t('comment') : t('comments')}
         </span>
       </div>
       {roots.length > 0 ? (
@@ -236,7 +265,7 @@ export function Comments({
           ))}
         </ul>
       ) : (
-        <p className="muted">No comments yet.</p>
+        <p className="muted">{t('No comments yet.')}</p>
       )}
       <CommentForm
         pasteId={pasteId}

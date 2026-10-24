@@ -157,6 +157,78 @@ test('open discussion posts an encrypted comment and a reader decrypts it', asyn
   await expect(reader.getByText(comment)).toBeVisible()
 })
 
+test('attachments, raw/QR/download, and clone with children', async ({ page, context }) => {
+  const text = unique('attachment-text')
+  const attachmentText = unique('attachment-body')
+  await page.goto('/', { waitUntil: 'networkidle' })
+  await page.locator('textarea').fill(text)
+  await page.locator('input[type="file"]').setInputFiles([
+    {
+      name: 'note.txt',
+      mimeType: 'text/plain',
+      buffer: Buffer.from(attachmentText),
+    },
+    {
+      name: 'icon.svg',
+      mimeType: 'image/svg+xml',
+      buffer: Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><script>window.__svgxss=1</script><rect width="10" height="10" fill="red"/></svg>',
+      ),
+    },
+  ])
+  await expect(page.getByText('note.txt')).toBeVisible()
+  await page.getByRole('button', { name: 'Create paste' }).click()
+  await page.getByText('Document created.').waitFor()
+  await expect(page.getByText('Attachments (2)')).toBeVisible()
+  await expect(page.getByText(attachmentText)).toBeVisible()
+  await expect(page.getByRole('img', { name: 'icon.svg' })).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as { __svgxss?: number }).__svgxss ?? 0)).toBe(0)
+  const firstUrl = page.url()
+
+  await page.getByRole('button', { name: 'Raw text' }).click()
+  await expect(page.getByRole('heading', { name: 'Plain text' })).toBeVisible()
+  await expect(page.locator('.raw-text')).toHaveText(text)
+  await page.getByRole('button', { name: 'Close' }).click()
+
+  await page.getByRole('button', { name: 'QR code' }).click()
+  await expect(page.locator('.qr-image')).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
+
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download' }).first().click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toBe('binflare.txt')
+
+  await page.getByRole('button', { name: 'Clone' }).click()
+  await expect(page.locator('textarea')).toHaveValue(text)
+  await expect(page.getByText('Cloning an existing document.')).toBeVisible()
+  await page.getByRole('button', { name: 'Create paste' }).click()
+  await page.getByText('Document created.').waitFor()
+  await expect(page.getByText('Version chain')).toBeVisible()
+  await expect(page.getByText(firstUrl)).toBeVisible()
+
+  const reader = await context.newPage()
+  await reader.goto(page.url(), { waitUntil: 'networkidle' })
+  await expect(reader.getByText(text)).toBeVisible()
+  await expect(reader.getByText(attachmentText)).toBeVisible()
+})
+
+test('language and dark theme persist', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' })
+  await page.locator('.language-select').selectOption('zh')
+  await expect(page.getByRole('heading', { name: '写下它，加密它，分享链接。' })).toBeVisible()
+  await expect(page.getByPlaceholder('粘贴或输入值得保密的内容…')).toBeVisible()
+  await page.getByRole('button', { name: '暗色模式' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await page.reload({ waitUntil: 'networkidle' })
+  await expect(page.getByRole('heading', { name: '写下它，加密它，分享链接。' })).toBeVisible()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  await page.getByRole('link', { name: '关于' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'PrivateBin 协议在 Cloudflare 上的实现。' }),
+  ).toBeVisible()
+})
+
 test('markdown is sanitized and the shell CSP uses a nonce', async ({ page, request }) => {
   const url = await createPaste(
     page,
@@ -244,7 +316,7 @@ test('compat API, REST alias, 600k/12B variant, and atomic burn', async ({ reque
 
   const tooLarge = await request.post('/', {
     headers: { 'x-requested-with': 'JSONHttpRequest' },
-    data: futureBody('A'.repeat(2_500_001)),
+    data: futureBody('A'.repeat(13_400_004)),
   })
   const tooLargeJson = await tooLarge.json()
   expect(tooLargeJson.status).toBe(1)

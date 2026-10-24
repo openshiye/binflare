@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-const URL_PATTERN = /(https?:\/\/[^\s<]+)/g
+const URL_PATTERN = /((?:https?|ftp):\/\/[^\s<]+|magnet:\?[^\s<]+)/g
 
 function trimTrailingPunctuation(value: string): { url: string; trailing: string } {
   let end = value.length
@@ -13,7 +13,12 @@ function trimTrailingPunctuation(value: string): { url: string; trailing: string
 export function linkifyText(text: string): ReactNode[] {
   const parts = text.split(URL_PATTERN)
   return parts.map((part, index) => {
-    if (!part.startsWith('http://') && !part.startsWith('https://')) {
+    if (
+      !part.startsWith('http://') &&
+      !part.startsWith('https://') &&
+      !part.startsWith('ftp://') &&
+      !part.startsWith('magnet:?')
+    ) {
       return part
     }
     const { url, trailing } = trimTrailingPunctuation(part)

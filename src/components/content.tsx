@@ -2,6 +2,18 @@ import { useEffect, useState, type ReactNode } from 'react'
 import type { Formatter } from '../lib/protocol'
 import { linkifyText } from '../lib/linkify'
 import { normalizeAttachments, safeChildren, type Attachment } from '../lib/format'
+import {
+  attachmentBytes,
+  attachmentSize,
+  dataUrlInfo,
+  decodeTextAttachment,
+  formatFileSize,
+  previewKind,
+  sanitizeFilename,
+  sanitizedSvgUrl,
+} from '../lib/attachments'
+import { blobPart } from '../lib/binary'
+import { useI18n } from '../lib/i18n'
 
 let linkHookInstalled = false
 
@@ -81,11 +93,18 @@ function Highlighted({ text }: { text: string }) {
   if (html === null) {
     return <PlainText text={text} />
   }
+  const lineCount = text.split('\n').length
+  const lineNumbers = Array.from({ length: lineCount }, (_, index) => index + 1).join('\n')
   return (
     <div className="content highlight">
-      <pre>
-        <code className="hljs" dangerouslySetInnerHTML={{ __html: html }} />
-      </pre>
+      <div className="highlight-wrap">
+        <pre className="line-numbers" aria-hidden="true">
+          {lineNumbers}
+        </pre>
+        <pre className="code">
+          <code className="hljs" dangerouslySetInnerHTML={{ __html: html }} />
+        </pre>
+      </div>
     </div>
   )
 }
@@ -100,38 +119,117 @@ export function ContentRenderer({ text, format }: { text: string; format: Format
   return <PlainText text={text} />
 }
 
+function AttachmentPreview({ attachment }: { attachment: Attachment }) {
+  const { t } = useI18n()
+  const info = dataUrlInfo(attachment.url)
+  const kind = info ? previewKind(info.mime) : null
+  const [objectUrl, setObjectUrl] = useState<string | null>(null)
+  const [svgUrl, setSvgUrl] = useState<string | null>(null)
+  const [text, setText] = useState<string | null>(null)
+  const name = sanitizeFilename(attachment.name)
+  const size = attachmentSize(attachment.url)
+
+  useEffect(() => {
+    if (kind !== 'pdf') {
+      return
+    }
+    const bytes = attachmentBytes(attachment.url)
+    if (!bytes) {
+      return
+    }
+    const url = URL.createObjectURL(new Blob([blobPart(bytes)], { type: 'application/pdf' }))
+    setObjectUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [attachment.url, kind])
+
+  useEffect(() => {
+    if (kind !== 'svg') {
+      return
+    }
+    let active = true
+    let localUrl: string | null = null
+    void sanitizedSvgUrl(attachment.url).then((url) => {
+      localUrl = url
+      if (active) {
+        setSvgUrl(url)
+      }
+    })
+    return () => {
+      active = false
+      if (localUrl) {
+        URL.revokeObjectURL(localUrl)
+      }
+    }
+  }, [attachment.url, kind])
+
+  useEffect(() => {
+    if (kind === 'text') {
+      setText(decodeTextAttachment(attachment.url))
+    }
+  }, [attachment.url, kind])
+
+  return (
+    <li className="attachment">
+      <div className="attachment-header">
+        <span className="attachment-name">{name}</span>
+        <span className="muted small">
+          {info?.mime ?? 'unknown type'} · {formatFileSize(size)}
+        </span>
+      </div>
+      <div className="attachment-preview">
+        {kind === 'image' ? <img src={attachment.url} alt={name} loading="lazy" /> : null}
+        {kind === 'svg' && svgUrl ? <img src={svgUrl} alt={name} loading="lazy" /> : null}
+        {kind === 'audio' ? <audio controls preload="metadata" src={attachment.url} /> : null}
+        {kind === 'video' ? <video controls preload="metadata" src={attachment.url} /> : null}
+        {kind === 'pdf' && objectUrl ? (
+          <iframe title={name} src={objectUrl} loading="lazy" />
+        ) : null}
+        {kind === 'text' && text !== null ? (
+          <pre className="attachment-text">{text.slice(0, 200_000)}</pre>
+        ) : null}
+        {kind === null ? (
+          <p className="muted small">{t('Preview is disabled for this file type. Download it to view it.')}</p>
+        ) : null}
+      </div>
+      <a href={attachment.url} download={name} className="button ghost small attachment-download">
+        {t('Download')}
+      </a>
+    </li>
+  )
+}
+
 export function AttachmentList({ payload }: {
   payload: { attachment?: string[] | string; attachment_name?: string[] | string }
 }) {
+  const { t } = useI18n()
   const attachments: Attachment[] = normalizeAttachments(payload)
   if (attachments.length === 0) {
     return null
   }
   return (
-    <section className="attachments" aria-label="Attachments">
-      <h2>Attachments</h2>
+    <section className="attachments" aria-label={t('Attachments')}>
+      <h2>{t('Attachments')} ({attachments.length})</h2>
       <ul>
         {attachments.map((attachment) => (
-          <li key={`${attachment.name}-${attachment.url.slice(0, 24)}`}>
-            <a href={attachment.url} download={attachment.name} className="attachment-link">
-              {attachment.name}
-            </a>
-          </li>
+          <AttachmentPreview
+            key={`${attachment.name}-${attachment.url.slice(0, 32)}`}
+            attachment={attachment}
+          />
         ))}
       </ul>
-      <p className="muted small">Attachment previews are not available in this version.</p>
     </section>
   )
 }
 
 export function ChildrenLinks({ children }: { children?: string[] }) {
+  const { t } = useI18n()
   const links = safeChildren(children)
   if (links.length === 0) {
     return null
   }
   return (
-    <section className="children" aria-label="Version chain">
-      <h2>Version chain</h2>
+    <section className="children" aria-label={t('Version chain')}>
+      <h2>{t('Version chain')}</h2>
       <ul>
         {links.map((link) => (
           <li key={link}>

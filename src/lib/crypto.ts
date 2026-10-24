@@ -62,6 +62,8 @@ export interface CreatePasteOptions {
   mode?: CipherMode
   compression?: Compression
   keyBytes?: Uint8Array
+  attachments?: Array<{ name: string; dataUrl: string }>
+  children?: string[]
 }
 
 export interface CreatePasteResult {
@@ -330,6 +332,13 @@ export async function createPasteCipher(
     options.burn ? 1 : 0,
   ]
   const payload: PastePayload = { paste }
+  if (options.attachments && options.attachments.length > 0) {
+    payload.attachment = options.attachments.map((attachment) => attachment.dataUrl)
+    payload.attachment_name = options.attachments.map((attachment) => attachment.name)
+  }
+  if (options.children && options.children.length > 0) {
+    payload.children = options.children
+  }
   const ct = await encryptMessage(
     key.bytes,
     options.password ?? '',

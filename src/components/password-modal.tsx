@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { useI18n } from '../lib/i18n'
 
 export function PasswordModal({
   onSubmit,
   error,
   busy,
-  title = 'Password required',
-  description = 'This document was encrypted with a password. The server cannot verify or recover it.',
-  submitLabel = 'Unlock',
+  title,
+  description,
+  submitLabel,
 }: {
   onSubmit: (password: string) => Promise<void>
   error?: string
@@ -15,6 +16,7 @@ export function PasswordModal({
   description?: string
   submitLabel?: string
 }) {
+  const { t } = useI18n()
   const [password, setPassword] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -25,9 +27,11 @@ export function PasswordModal({
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="password-title">
       <div className="modal">
-        <p className="eyebrow">Protected document</p>
-        <h1 id="password-title">{title}</h1>
-        <p className="muted">{description}</p>
+        <p className="eyebrow">{t('Protected document')}</p>
+        <h1 id="password-title">{title ?? t('Password required')}</h1>
+        <p className="muted">
+          {description ?? t('This document was encrypted with a password. The server cannot verify or recover it.')}
+        </p>
         <form
           onSubmit={(event) => {
             event.preventDefault()
@@ -35,7 +39,7 @@ export function PasswordModal({
           }}
         >
           <label className="field">
-            <span>Password</span>
+            <span>{t('Password')}</span>
             <input
               ref={inputRef}
               type="password"
@@ -47,10 +51,10 @@ export function PasswordModal({
           </label>
           {error ? <div className="alert error" role="alert">{error}</div> : null}
           <button type="submit" className="button primary" disabled={busy}>
-            {busy ? 'Working…' : submitLabel}
+            {busy ? t('Working…') : submitLabel ?? t('Unlock')}
           </button>
         </form>
-        <p className="muted small">The password is never sent to the server.</p>
+        <p className="muted small">{t('The password is never sent to the server.')}</p>
       </div>
     </div>
   )

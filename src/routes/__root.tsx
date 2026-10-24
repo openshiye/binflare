@@ -1,4 +1,5 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { I18nProvider } from '../lib/i18n'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -20,9 +21,17 @@ function RootComponent() {
     <html lang="en">
       <head>
         <HeadContent />
+        <script src="/theme.js" />
       </head>
       <body>
-        <Outlet />
+        <noscript>
+          <div style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
+            Binflare requires JavaScript for client-side encryption.
+          </div>
+        </noscript>
+        <I18nProvider>
+          <Outlet />
+        </I18nProvider>
         <Scripts />
       </body>
     </html>
