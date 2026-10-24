@@ -25,8 +25,9 @@ Binflare protects paste content from the storage layer and from an honest-but-cu
 - Plain text and highlighted code are escaped; linkification only allows safe schemes.
 - Comment text is plain text plus linkification, not Markdown.
 - External images in Markdown are blocked by the CSP image policy (`self`, `data:`, `blob:`) to avoid third-party requests.
-- Attachment downloads are client-side data URLs; v0.1 does not inline-preview them. Preview sanitization (SVG/MIME) is v0.1.x.
-- `children` links are rendered only for `http(s)` URLs.
+- Attachment downloads are client-side data URLs; unsafe MIME types are download-only. Images/audio/video use data URLs, PDFs use a blob iframe, SVG is sanitized with DOMPurify before creating a blob URL, and text previews are rendered as text. Filenames are sanitized. Attachment content is inside the encrypted payload.
+- QR codes are generated locally and contain the key; the UI warns. Email is a mailto link containing the key; the UI warns. Neither sends data to a third party from the app.
+- `children` links are rendered only for `http(s)` URLs. Clone appends the current document URL inside the encrypted payload; it is not visible to the server.
 
 ## Tokens and identifiers
 
@@ -42,16 +43,17 @@ Binflare protects paste content from the storage layer and from an honest-but-cu
 - Ciphertext/size limits and a Cron cleanup job.
 - No accounts or global quotas; a public instance needs rate limiting and monitoring of D1/Workers quotas.
 
-## Logging and data handling
+## Storage and cleanup
 
-- Do not log request bodies, keys, passwords, ciphertext or raw IPs.
-- Rate-limit keys use SHA-256 of the IP.
+- Small ciphertext is in D1; large ciphertext is in R2. Burn/delete/expiry remove the D1 row first, then the R2 object. If the R2 delete fails, the D1 row is gone but ciphertext may remain orphaned; use R2 lifecycle rules or operator cleanup for strict hygiene.
+- A deployment without an R2 binding is limited to the D1 ciphertext cap (1.875 MB). With R2, the default ciphertext cap is 10 MB.
+- The service does not log request bodies, keys, passwords, ciphertext or raw IPs. Rate-limit keys use SHA-256 of the IP.
 - Errors returned to clients are generic for missing/expired/burned/deleted pastes to avoid an existence oracle.
 - No analytics, tracking pixels, third-party fonts, or cookies for application state.
 
 ## Supply chain
 
-- The frontend uses TanStack Start/Router, React, Vite, marked, DOMPurify and highlight.js, pinned to exact versions. The lockfile is committed.
+- The frontend uses TanStack Start/Router, React, Vite, marked, DOMPurify, highlight.js and qrcode, pinned to exact versions. The lockfile is committed.
 - The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored. See `THIRD_PARTY_NOTICES.md`.
 - The compatibility harness runs against a pinned PrivateBin release tag and a pinned PHP container for hash/HMAC checks.
 

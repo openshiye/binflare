@@ -16,19 +16,19 @@ Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare i
 | Create/read/delete | Single front controller | Root compat API + `/api/*` alias | Adapt |
 | Expiry | 5min–1year/never; lazy check; purge on create | Same options; lazy check + Cron | Adapt |
 | Burn | Read then delete; race in upstream | D1 batch transaction; exactly one winner | Improve |
-| Comments | Encrypted text/nickname, server timestamp, cascade delete | Same; no IP-derived icon | Adapt |
-| Attachments | Multiple files, previews, MIME/SVG sanitization | v0.1 read-only list/download; author/preview in v0.1.x | Preserve (read) / Defer |
-| `children` | Version-chain links in plaintext | Read/render safe links; clone write in v0.1.x | Preserve (read) / Defer |
-| Formats | plaintext, markdown, syntax highlighting | Same | Preserve |
-| Sharing | Copy, raw, download, clone, email, QR | Copy link/delete link in v0.1; rest v0.1.x | Adapt / Defer |
-| Password | Client-side only; no recovery | Same | Preserve |
-| Dark mode / i18n | 39 locales, Bootstrap themes | English functional UI; v0.1.x | Defer |
+| Comments | Encrypted text/nickname, server timestamp, cascade delete | Same; deterministic client-side avatars from comment ID (no IP metadata) | Adapt |
+| Attachments | Multiple files, drag/drop/clipboard, previews, MIME/SVG sanitization, clone | Same; previews are client-side, unsafe MIME download-only | Preserve |
+| `children` | Version-chain links in plaintext | Read/render safe links; clone appends the current URL | Preserve |
+| Formats | plaintext, markdown, syntax highlighting | Same, plus line numbers and ftp/magnet linkification | Preserve |
+| Sharing | Copy, raw, download, clone, email, QR | Same, including raw/download/email/QR/clone | Preserve |
+| Password | Client-side only; no recovery | Same; burn+password prompts before the destructive read | Preserve |
+| Dark mode / i18n | 39 locales, Bootstrap themes | English/Simplified Chinese, dark/light theme; more locales future | Adapt |
 | JSON-LD | Public metadata endpoints | Not implemented | Reject |
-| Shortener proxies | YOURLS/Shlink/Chhoto | Not implemented | Reject |
+| Shortener proxies | YOURLS/Shlink/Chhoto | Not implemented; optional external integration future | Reject |
 | Template switching / admin CLI | PHP-specific | Not implemented | Reject |
-| Storage backends | FS/DB/S3/GCS | D1 only | Reject |
+| Storage backends | FS/DB/S3/GCS | D1 + R2 | Adapt |
 | v1/ZeroBin | Legacy format | Not supported | Reject |
-| Identicons | IP-derived comment icon | Omitted (privacy) | Reject |
+| Identicons | IP-derived comment icon | Client-side deterministic avatar from comment ID | Adapt (privacy) |
 
 ## Upstream quirks not copied
 
@@ -43,11 +43,11 @@ Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare i
 
 ## Deliberate divergences
 
-- D1 row limit: ciphertext is capped at 1.875 MB instead of upstream's 10 MiB default.
-- No IP-derived comment icon (avoids a stable per-IP metadata leak).
+- D1 stores up to 1.875 MB of ciphertext; larger ciphertext goes to R2 (default 10 MB). The v2 API still returns one `ct`.
+- Comment avatars are generated client-side from the comment ID, not from IP + server salt. This preserves the visual feature without a stable per-IP metadata leak.
 - No JSON-LD, shortener, template switching, admin CLI or multi-backend storage.
 - No data import. Protocol compatibility does not imply data migration.
-- Comments and attachments share the v0.1 release cutline described in the roadmap.
+- English and Simplified Chinese UI; more locales can be added through the dictionary layer.
 
 ## License facts
 

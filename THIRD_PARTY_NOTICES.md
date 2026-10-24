@@ -14,6 +14,7 @@ Binflare's own code is MIT-licensed. The following direct dependencies are used 
 | marked | MIT | https://marked.js.org |
 | DOMPurify | MPL-2.0 OR Apache-2.0 | https://github.com/cure53/DOMPurify |
 | highlight.js | BSD-3-Clause | https://highlightjs.org |
+| qrcode | MIT | https://github.com/soldair/node-qrcode |
 | Vitest | MIT | https://vitest.dev |
 | Playwright | Apache-2.0 | https://playwright.dev |
 | Cloudflare Vite plugin | see package license | https://github.com/cloudflare/workers-sdk |

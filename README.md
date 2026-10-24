@@ -18,19 +18,17 @@ Binflare implements the **PrivateBin v2 wire format and JSON API** as shipped in
 
 > **Binflare is an independent implementation. It is not affiliated with, endorsed by, or an official port of the PrivateBin project.** PrivateBin is © Sébastien Sauvage and contributors and is licensed under Zlib/libpng. See [NOTICE](NOTICE).
 
-## What works in v0.1
+## What works
 
 - Create, read, expire, burn-after-reading and delete-token flows.
 - Optional password protection (client-side only; no recovery).
-- Plain text, Markdown and syntax-highlighted pastes, with a preview tab.
-- Comments / open discussion, including replies and optional nicknames.
-- PrivateBin-compatible pastes and comments, including attachment payloads (read-only in v0.1: files are listed and downloadable, without inline previews).
-- Version-chain `children` links are preserved and shown when present.
+- Plain text, Markdown and syntax-highlighted pastes, with a preview tab and line numbers.
+- Comments / open discussion, including replies, nicknames and deterministic client-side avatars (no IP-derived metadata).
+- Attachments: multiple files, drag/drop, clipboard paste, remove, filename/size display, safe previews (images, SVG sanitized, audio, video, PDF, text), download, and clone.
+- Sharing: copy link/text, download, raw text, email, QR code and clone. Clones write the version-chain `children` links.
 - A static, prerendered SPA shell. Paste content is fetched and decrypted in the browser; there is no server-side React rendering of paste data.
-- D1 storage, atomic burn on first read, lazy expiry checks and a scheduled cleanup job.
-- Optional Turnstile for public demos, plus per-IP write rate limiting.
-
-Attachment authoring, inline previews, QR/email/clone actions, a Chinese UI and theme polish are v0.1.x work. See [ROADMAP](docs/ROADMAP.md).
+- D1 for small ciphertext; R2 for larger ciphertext (transparent to the PrivateBin v2 API). Atomic burn, lazy expiry checks and a scheduled cleanup job.
+- English and Simplified Chinese UI, dark/light theme, optional Turnstile, and per-IP write rate limiting.
 
 ## How it works
 
@@ -43,12 +41,13 @@ Browser (static SPA shell)
             ├─ /         PrivateBin-compatible JSON API
             ├─ /api/*    REST API
             ├─ D1        pastes, comments, rate limits
+            ├─ R2        large ciphertext
             └─ Cron      expiry cleanup
 ```
 
 - The SPA shell is prerendered at build time. React does not render paste pages on the server.
 - The root endpoint serves the PrivateBin-compatible API (`status: 0/1`, `?pasteid=`, `?id#key`, delete links) and the SPA shell. `/api/*` exposes the same operations with ordinary HTTP status codes.
-- Storage is Cloudflare D1. Burn-after-reading is performed in one D1 batch transaction: select the paste and delete it (and its comments) atomically. Exactly one concurrent reader can receive the payload.
+- Storage is D1 for small ciphertext and R2 for larger ciphertext; the API still returns one PrivateBin v2 `ct`. Burn-after-reading is performed in one D1 batch transaction: select the paste and delete it (and its comments) atomically. Exactly one concurrent reader can receive the payload.
 
 ## Security model
 
@@ -61,7 +60,8 @@ Browser (static SPA shell)
 
 ### Honest limitations
 
-- **Paste size**: D1 has a 2,000,000-byte row/value limit. Binflare caps ciphertext at 1.875 MB (base64 request up to 2.5 MB). Attachments are inside the ciphertext and share that cap. R2 for larger payloads is planned.
+- **Paste size**: D1 has a 2,000,000-byte row/value limit. Binflare stores up to 1.875 MB of ciphertext in D1 and spills larger ciphertext to R2, with a default 10 MB cap. Attachments live inside the ciphertext and share that cap. A deployment without an R2 binding is limited to 1.875 MB.
+- **R2 cleanup**: burn/delete/expiry remove the R2 object after the D1 row is deleted. If that R2 delete fails, the D1 row is gone but ciphertext may remain orphaned in the bucket; use R2 lifecycle rules or an operator cleanup for strict storage hygiene.
 - **D1 is a single primary** (read replication is not enabled). Writes are read-after-write consistent on that primary; clients far from it pay a round trip.
 - **No native TTL**: expired pastes return the generic "does not exist" error on read; physical deletion happens lazily and via a Cron job.
 - **Burn is an honest-server property**: the server deletes on first read, but a malicious operator could retain a copy. The same applies to any server-side pastebin.
@@ -70,16 +70,16 @@ Browser (static SPA shell)
 - **Burn + password is destructive on a wrong attempt**: the client asks for the password before reading a burn link, but reading is what consumes the document. A wrong password still destroys it.
 - **Comments**: no pagination, no per-comment deletion; comments are removed with the paste.
 - **No data migration**: existing PrivateBin pastes are not imported. The protocol is compatible; the data is not moved.
-- **Not implemented in v0.1**: v1/ZeroBin, JSON-LD, URL shortener proxies, template switching, admin CLI, multi-backend storage, 39 locales.
-- **Free-tier envelope**: D1 free plan is 5M rows read/day, 100K rows written/day and 500 MB per database (5 GB per account); Workers free plan is 100K requests/day with 10 ms CPU. Static assets are not billed per request. Public demos should enable rate limiting and optionally Turnstile. Local measurements for the maximum 1.875 MB ciphertext: ~156 ms create and ~77 ms read wall time (including local D1/network); the Workers runtime FNV takes ~27 ms CPU for the 2.5 MB base64 string, so max-size requests can exceed the free plan's 10 ms CPU. Lower `MAX_PASTE_CT_BYTES`, use a paid plan, or wait for the R2 path if that matters for your deployment.
+- **Not implemented**: v1/ZeroBin, JSON-LD, URL shortener proxies, template switching, admin CLI, multi-backend storage, automatic data migration from another instance, and translations beyond English/Simplified Chinese. These are documented as non-goals or optional integrations in [PARITY](docs/PARITY.md).
+- **Free-tier envelope**: D1 free plan is 5M rows read/day, 100K rows written/day and 500 MB per database (5 GB per account); Workers free plan is 100K requests/day with 10 ms CPU. R2 has its own free storage/operation allowance. Static assets are not billed per request. Public demos should enable rate limiting and optionally Turnstile. Local measurements for the maximum 1.875 MB D1 ciphertext: ~156 ms create and ~77 ms read wall time (including local D1/network); the Workers runtime FNV takes ~25–27 ms CPU for the 2.5 MB base64 string, so max-size D1 requests can exceed the free plan's 10 ms CPU. Lower `MAX_PASTE_CT_BYTES`, use a paid plan, or rely on the R2 path for large attachments.
 
 ## Stack
 
 - [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router) (no Query/Form/Table/Virtual/Store/DB).
 - React 19, Vite, TypeScript.
-- Cloudflare Workers, D1, Cron Triggers, optional Turnstile.
+- Cloudflare Workers, D1, R2, Cron Triggers, optional Turnstile.
 - Client crypto: WebCrypto (PBKDF2-SHA256, AES-GCM/CTR/CBC) and native `CompressionStream`/`DecompressionStream` for raw DEFLATE.
-- Markdown: marked + DOMPurify; highlighting: highlight.js.
+- Markdown: marked + DOMPurify; highlighting: highlight.js; QR: qrcode.
 
 Exact package versions are pinned in `package.json`; upgrades are separate changes verified by the compatibility harness.
 
@@ -89,8 +89,9 @@ Prerequisites: Node.js >= 22, pnpm, a Cloudflare account, and Wrangler login.
 
 ```bash
 pnpm install
-# create a D1 database and put its id into wrangler.jsonc
+# create the D1 database and R2 bucket; put the D1 id into wrangler.jsonc
 pnpm exec wrangler d1 create binflare
+pnpm exec wrangler r2 bucket create binflare-pastes
 pnpm db:migrate:local
 pnpm dev
 ```

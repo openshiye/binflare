@@ -18,19 +18,17 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 
 > **Binflare 是独立实现，与 PrivateBin 项目无隶属、无背书，也不是官方移植。** PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。见 [NOTICE](NOTICE)。
 
-## v0.1 能力
+## 能力
 
 - 创建、读取、过期、阅后即焚、删除令牌。
 - 可选口令保护（纯客户端；无法找回）。
-- 纯文本、Markdown、语法高亮，带预览。
-- 评论 / 开放讨论，含回复和可选昵称。
-- 兼容 PrivateBin 的粘贴与评论，包括附件 payload（v0.1 只读：列出文件并提供下载，不做内联预览）。
-- 保留并展示版本链 `children` 链接。
+- 纯文本、Markdown、语法高亮，带预览和行号。
+- 评论 / 开放讨论，含回复、昵称和客户端确定性头像（不使用 IP 派生元数据）。
+- 附件：多文件、拖放、剪贴板粘贴、移除、文件名/大小、图片/SVG 消毒/音频/视频/PDF/文本预览、下载、克隆。
+- 分享：复制链接/正文、下载、原始文本、邮件、二维码、克隆；克隆会写入版本链 `children`。
 - 预渲染 SPA 壳；粘贴内容只在浏览器拉取和解密，服务端不做粘贴内容的 React SSR。
-- D1 存储、首次读取原子焚毁、读时过期判定、Cron 清理。
-- 可选 Turnstile，以及按 IP 的写入限流。
-
-附件作者能力、内联预览、二维码/邮件/克隆、中文 UI 和主题打磨属于 v0.1.x，见 [ROADMAP](docs/ROADMAP.md)。
+- 小密文存 D1，大密文透明转 R2；首次读取原子焚毁、读时过期判定、Cron 清理。
+- 英/简中 UI、明暗主题、可选 Turnstile，以及按 IP 的写入限流。
 
 ## 工作方式
 
@@ -43,12 +41,13 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
             ├─ /         PrivateBin 兼容 JSON API
             ├─ /api/*    REST API
             ├─ D1        pastes、comments、rate_limits
+            ├─ R2        大密文
             └─ Cron      过期清理
 ```
 
 - SPA 壳在构建时预渲染；React 不在服务端渲染粘贴页面。
 - 根路径同时提供 PrivateBin 兼容 API（`status: 0/1`、`?pasteid=`、`?id#key`、删除链接）和 SPA 壳；`/api/*` 用普通 HTTP 状态码提供同一组操作。
-- 存储使用 Cloudflare D1。阅后即焚在一个 D1 batch 事务内完成：读取并删除粘贴及其评论；并发首读只有一个读者能拿到 payload。
+- 存储使用 D1（小密文）和 R2（大密文）；API 仍返回一个 PrivateBin v2 `ct`。阅后即焚在一个 D1 batch 事务内完成：读取并删除粘贴及其评论；并发首读只有一个读者能拿到 payload。
 
 ## 安全模型
 
@@ -61,7 +60,8 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 
 ### 限制
 
-- **粘贴大小**：D1 单行/单值上限 2,000,000 字节；Binflare 将密文限制在 1.875 MB（base64 请求最多 2.5 MB）。附件在密文内，共享该上限；更大附件需要 R2（计划中）。
+- **粘贴大小**：D1 单行/单值上限 2,000,000 字节。Binflare 将最多 1.875 MB 密文存 D1，更大密文转 R2，默认上限 10 MB；附件在密文内共享该上限。没有 R2 绑定时上限为 1.875 MB。
+- **R2 清理**：焚毁/删除/过期会在 D1 行删除后删除 R2 对象；如果 R2 删除失败，D1 行已不存在但密文可能成为桶内孤儿。严格清理可用 R2 生命周期规则或人工清理。
 - **D1 单主库**（未开启读复制）：主库写后读一致；远端客户端承担一个往返延迟。
 - **无原生 TTL**：过期粘贴读取时返回通用「不存在」；物理删除由读时清理和 Cron 完成。
 - **焚毁依赖诚实服务端**：首次读取即删，但恶意运营者可以保留副本；任何服务端粘贴板都同理。
@@ -70,16 +70,16 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 - **焚毁 + 口令是破坏性的**：客户端会在读取焚毁链接前询问口令，但读取本身就会销毁文档；口令错误也会消耗掉它。
 - **评论**：无分页、不能单条删除；随粘贴一起删除。
 - **不迁移数据**：不导入已有 PrivateBin 粘贴；协议兼容，但数据不搬家。
-- **v0.1 不做**：v1/ZeroBin、JSON-LD、短链代理、模板切换、admin CLI、多存储后端、39 种语言。
-- **免费额度**：D1 免费版 5M 行读/天、100K 行写/天、单库 500 MB（账户 5 GB）；Workers 免费版 100K 请求/天、10 ms CPU；静态资源不按请求计费。公共演示应开启限流，可选 Turnstile。本地实测最大粘贴创建约 156 ms、读取约 77 ms（含本地 D1/网络）；Workers 运行时对 2.5 MB base64 的 FNV 约 27 ms CPU，满尺寸请求可能超过免费版 10 ms CPU。必要时降低 `MAX_PASTE_CT_BYTES`、使用付费计划或等待 R2 路径。
+- **未实现**：v1/ZeroBin、JSON-LD、短链代理、模板切换、admin CLI、多存储后端、从其他实例自动迁移数据、英/简中之外的语言。均在 [PARITY](docs/PARITY.md) 中列为 non-goal 或可选集成。
+- **免费额度**：D1 免费版 5M 行读/天、100K 行写/天、单库 500 MB（账户 5 GB）；Workers 免费版 100K 请求/天、10 ms CPU；R2 有独立免费存储/操作额度；静态资源不按请求计费。公共演示应开启限流，可选 Turnstile。本地实测最大 1.875 MB D1 密文创建约 156 ms、读取约 77 ms（含本地 D1/网络）；Workers 运行时对 2.5 MB base64 的 FNV 约 25–27 ms CPU，满尺寸 D1 请求可能超过免费版 10 ms CPU。必要时降低 `MAX_PASTE_CT_BYTES`、使用付费计划，或让大附件走 R2。
 
 ## 技术栈
 
 - [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router)（不使用 Query/Form/Table/Virtual/Store/DB）。
 - React 19、Vite、TypeScript。
-- Cloudflare Workers、D1、Cron Triggers、可选 Turnstile。
+- Cloudflare Workers、D1、R2、Cron Triggers、可选 Turnstile。
 - 客户端加密：WebCrypto（PBKDF2-SHA256、AES-GCM/CTR/CBC），原生 `CompressionStream`/`DecompressionStream` 做 raw DEFLATE。
-- Markdown：marked + DOMPurify；高亮：highlight.js。
+- Markdown：marked + DOMPurify；高亮：highlight.js；二维码：qrcode。
 
 `package.json` 精确锁版本；升级单独提交，并用兼容 harness 验证。
 
@@ -89,8 +89,9 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 
 ```bash
 pnpm install
-# 创建 D1，把 id 写进 wrangler.jsonc
+# 创建 D1 和 R2，把 D1 id 写进 wrangler.jsonc
 pnpm exec wrangler d1 create binflare
+pnpm exec wrangler r2 bucket create binflare-pastes
 pnpm db:migrate:local
 pnpm dev
 ```

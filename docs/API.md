@@ -146,21 +146,23 @@ Error body:
   "expireDefault": "1week",
   "formatters": ["plaintext", "markdown", "syntaxhighlighting"],
   "formatterDefault": "plaintext",
-  "maxCiphertextBytes": 1875000,
-  "maxCiphertextBase64": 2500000,
+  "maxCiphertextBytes": 10000000,
+  "maxCiphertextBase64": 13400000,
+  "d1CiphertextBytes": 1875000,
+  "r2Enabled": true,
   "features": {
     "discussion": true,
     "password": true,
     "burn": true,
-    "attachments": false,
-    "qr": false,
-    "email": false
+    "attachments": true,
+    "qr": true,
+    "email": true
   },
   "turnstileSiteKey": ""
 }
 ```
 
-`features.attachments` is false in v0.1 because attachment authoring is deferred; attachment payloads from compatible clients are still readable.
+`maxCiphertextBytes` is the effective cap. With an R2 binding, ciphertext up to 10 MB is accepted; without R2, the D1 cap (1.875 MB) applies. The API still returns a single base64 `ct`; R2 storage is transparent to clients.
 
 ## Headers
 
@@ -173,7 +175,7 @@ Error body:
 
 ## Limits and validation
 
-- Ciphertext: base64 request <= 2,500,000 characters; decoded <= 1,875,000 bytes.
+- Ciphertext: with R2, base64 request <= 13,400,000 characters and decoded <= 10,000,000 bytes. Without R2, base64 <= 2,500,000 and decoded <= 1,875,000 bytes. Attachments are inside the ciphertext.
 - Spec: v2 enums/ranges, not fixed defaults. 600000 iterations and a 12-byte IV are valid.
 - Expiry: `5min`, `10min`, `1hour`, `1day`, `1week`, `1month`, `1year`, `never`.
 - Rate limit: default one create/comment per 10 seconds per IP; configurable.
@@ -181,4 +183,4 @@ Error body:
 
 ## Not part of the API
 
-JSON-LD, URL shortener proxies, template selection and admin operations are not implemented in v0.1. Requests for those paths may return 404.
+JSON-LD, URL shortener proxies, template selection and admin operations are not implemented. Requests for those paths may return 404.

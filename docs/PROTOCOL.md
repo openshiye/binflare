@@ -110,7 +110,7 @@ Comment:
 { "comment": "text", "nickname": "optional" }
 ```
 
-`attachment`, `attachment_name` and `children` are optional. `children` is a version-chain field; readers preserve and display safe `http(s)` links. Clone-write behavior is deferred to v0.1.x and must follow the pinned baseline.
+`attachment`, `attachment_name` and `children` are optional. `children` is a version-chain field; readers preserve and display safe `http(s)` links. Binflare's clone action appends the current document URL to `children` before creating the new document, so the chain is preserved without changing the v2 shape. More locales are future work; the protocol itself is locale-neutral.
 
 ## IDs, salt and deletion tokens
 
@@ -189,7 +189,7 @@ Errors use HTTP 200 with `{"status":1,"message":"..."}`. The message strings mat
 
 ### Comments
 
-- `meta.created` is server time in seconds; `meta.icon` is omitted (no IP-derived identifier).
+- `meta.created` is server time in seconds; `meta.icon` is omitted. The client renders a deterministic avatar from the comment ID, so no IP-derived identifier is stored or transmitted.
 - `parentid` is the paste ID for a root comment, or another comment ID for a reply. The server validates that the parent belongs to the same paste.
 - Comments are deleted with the paste. There is no pagination or per-comment delete.
 
@@ -206,6 +206,12 @@ Server-side validation mirrors the upstream `FormatV2` enums and ranges:
 - Paste meta is exactly `{expire}`; formatter must be enabled; discussion/burn are 0 or 1; burn + discussion is rejected.
 
 It does not hardcode the default IV length, salt length or iteration count.
+
+## Storage and size
+
+The v2 wire format is unchanged. Binflare stores small ciphertext in D1 and large ciphertext in R2 (`pastes/<id>`), returning a single base64 `ct` to clients either way. D1 ciphertext is capped at 1.875 MB by default; R2 ciphertext is capped at 10 MB. Attachments are inside the encrypted payload. A deployment without an R2 binding is limited to the D1 cap.
+
+Burn/delete/expiry remove the D1 row and then the R2 object. If the R2 delete fails, the D1 row is gone but orphaned ciphertext may remain; use R2 lifecycle rules or operator cleanup for strict hygiene.
 
 ## Not supported
 
