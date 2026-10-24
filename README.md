@@ -1,1 +1,48 @@
-PHAgYWxpZ249ImNlbnRlciI+CiAgPGltZyBzcmM9ImRvY3MvbG9nby5wbmciIGFsdD0iQmluZmxhcmUgbG9nbyIgd2lkdGg9IjQ0MCI+CjwvcD4KCiMgQmluZmxhcmUKCioqQSB6ZXJvLWtub3dsZWRnZSBwYXN0ZWJpbiB0aGF0IHJ1bnMgZW50aXJlbHkgb24gQ2xvdWRmbGFyZSBXb3JrZXJzIGFuZCBEMSDigJQgbm8gc2VydmVyIHRvIGhvc3QsIG5vIHJ1bnRpbWUgdG8gbWFpbnRhaW4uKioKClBhc3RlcyBhcmUgZW5jcnlwdGVkIGluIHlvdXIgYnJvd3NlciAoQUVTLTI1Ni1HQ00gdmlhIFdlYkNyeXB0bykgYmVmb3JlIHRoZXkgYXJlIHVwbG9hZGVkLiBUaGUgc2VydmVyIG9ubHkgZXZlciBzdG9yZXMgY2lwaGVydGV4dDsgdGhlIGRlY3J5cHRpb24ga2V5IGxpdmVzIGV4Y2x1c2l2ZWx5IGluIHRoZSBVUkwgYCNmcmFnbWVudGAgYW5kIGlzIG5ldmVyIHNlbnQgdG8gdGhlIHNlcnZlci4KCj4g8J+apyAqKlN0YXR1czogc3RhZ2UgMCDigJQgcHJvamVjdCBzY2FmZm9sZGluZy4qKiBDb3JlIGltcGxlbWVudGF0aW9uIGluIHByb2dyZXNzLiBUaGlzIHJlcG9zaXRvcnkgaXMgcHJpdmF0ZSBkdXJpbmcgaW5jdWJhdGlvbiBhbmQgd2lsbCBiZSBtYWRlIHB1YmxpYyBhdCB2MC4xLgoKIyMgVXBzdHJlYW0gJiBhdHRyaWJ1dGlvbgoKVGhpcyBwcm9qZWN0IGlzIGFuICoqaW5kZXBlbmRlbnQsIGNsZWFuLXJvb20gcmVpbXBsZW1lbnRhdGlvbiBpbnNwaXJlZCBieSBbUHJpdmF0ZUJpbl0oaHR0cHM6Ly9naXRodWIuY29tL1ByaXZhdGVCaW4vUHJpdmF0ZUJpbikqKiBieSBbQFByaXZhdGVCaW5dKGh0dHBzOi8vZ2l0aHViLmNvbS9Qcml2YXRlQmluKSDigJQgb3JpZ2luYWxseSBjcmVhdGVkIGJ5IFPDqWJhc3RpZW4gU2F1dmFnZS4KCi0g8J+UlyBVcHN0cmVhbSByZXBvc2l0b3J5OiBodHRwczovL2dpdGh1Yi5jb20vUHJpdmF0ZUJpbi9Qcml2YXRlQmluCi0g8J+RpCBVcHN0cmVhbSBvcmdhbml6YXRpb246IFtAUHJpdmF0ZUJpbl0oaHR0cHM6Ly9naXRodWIuY29tL1ByaXZhdGVCaW4pCi0g8J+TnCBVcHN0cmVhbSBsaWNlbnNlOiBabGliL2xpYnBuZyDigJQgZnVsbCBhdHRyaWJ1dGlvbiBpbiBbTk9USUNFXShOT1RJQ0UpCgpUaGlzIGlzICoqbm90IGEgZm9yayoqIG9mIFByaXZhdGVCaW4sICoqbm90IGFuIG9mZmljaWFsIHBvcnQqKiwgYW5kIGl0IGlzICoqbm90IGFmZmlsaWF0ZWQgd2l0aCBvciBlbmRvcnNlZCBieSoqIHRoZSBQcml2YXRlQmluIHByb2plY3QuIE5vIHVwc3RyZWFtIGNvZGUgaGFzIGJlZW4gY29waWVkOyBub25lIG9mIHVwc3RyZWFtJ3MgYnVuZGxlZCB0aGlyZC1wYXJ0eSBsaWJyYXJpZXMgKGluY2x1ZGluZyB0aGUgR1BMdjItbGljZW5zZWQgcmF3aW5mbGF0ZSkgYW5kIG5vbmUgb2YgaXRzIENDLUJZLWxpY2Vuc2VkIGFydHdvcmsgYXJlIHVzZWQuIENsaWVudC1zaWRlIGNvbXByZXNzaW9uIGFuZCBlbmNyeXB0aW9uIGFyZSByZWltcGxlbWVudGVkIG9uIFdlYkNyeXB0by4KCiMjIOKaoO+4jyBDb21wYXRpYmlsaXR5IG5vdGljZQoKKipQYXN0ZXMgYXJlIE5PVCBjb21wYXRpYmxlIHdpdGggdXBzdHJlYW0gUHJpdmF0ZUJpbi4qKiBMaW5rcyBhbmQgZGF0YSBmb3JtYXRzIGRpZmZlciAodGhlIGNsaWVudC1zaWRlIGVuY3J5cHRpb24gZm9ybWF0IGlzIGRpZmZlcmVudCksIHNvIHBhc3RlcyBjcmVhdGVkIGhlcmUgY2Fubm90IGJlIG9wZW5lZCBpbiBQcml2YXRlQmluLCBhbmQgdmljZSB2ZXJzYS4gVGhpcyBwcm9qZWN0IGlzIGEgbmV3IGltcGxlbWVudGF0aW9uLCBub3QgYSBtaWdyYXRpb24gdG9vbC4KCiMjIFNlY3VyaXR5IG1vZGVsCgotIEVuY3J5cHRpb24gaGFwcGVucyAqKmNsaWVudC1zaWRlIG9ubHkqKiAoV2ViQ3J5cHRvLCBBRVMtMjU2LUdDTSkuIFRoZSBrZXkgaXMgZ2VuZXJhdGVkIGluIHRoZSBicm93c2VyIGFuZCBjYXJyaWVkIGluIHRoZSBVUkwgYCNmcmFnbWVudGAsIHdoaWNoIGJyb3dzZXJzIG5ldmVyIHNlbmQgdG8gc2VydmVycy4KLSBUaGUgc2VydmVyIHN0b3JlcyBjaXBoZXJ0ZXh0ICsgbWV0YWRhdGEgb25seSAoZXhwaXJ5LCBidXJuIGZsYWcsIGRlbGV0ZS10b2tlbiBoYXNoIOKAlCB0b2tlbnMgYXJlIHN0b3JlZCBhcyBTSEEtMjU2IGhhc2hlcywgbmV2ZXIgaW4gcGxhaW4gdGV4dCkuCi0gU3RvcmFnZSBpcyBDbG91ZGZsYXJlIEQxIChTUUxpdGUpIHdpdGggKipzdHJvbmcgY29uc2lzdGVuY3kqKjogYSBwYXN0ZSBpcyByZWFkYWJsZSBldmVyeXdoZXJlIHRoZSBtb21lbnQgaXQgaXMgY3JlYXRlZC4gQnVybi1hZnRlci1yZWFkaW5nIGlzIGEgc2luZ2xlIGF0b21pYyBgREVMRVRFIOKApiBSRVRVUk5JTkdgIHN0YXRlbWVudCDigJQgZXhhY3RseSBvbmUgcmVhZGVyIGNhbiBldmVyIHJldHJpZXZlIGEgYnVybiBwYXN0ZS4gRXhwaXJ5IGlzIGNoZWNrZWQgb24gZXZlcnkgcmVhZCwgYW5kIGEgc2NoZWR1bGVkIGNsZWFudXAgam9iIHJlY2xhaW1zIHN0b3JhZ2UuCgojIyMgTGltaXRhdGlvbnMgKHN0YXRlZCBob25lc3RseSkKCi0gKipNYXhpbXVtIHBhc3RlIHNpemUgaXMgMiBNQioqIChEMSdzIHBlci1yb3cgbGltaXQg4oCUIHRoZSBzYW1lIGRlZmF1bHQgc2l6ZSBsaW1pdCBhcyB1cHN0cmVhbSBQcml2YXRlQmluKS4gTGFyZ2VyIHBheWxvYWRzIGFuZCBhdHRhY2htZW50cyBiZWxvbmcgaW4gUjIsIG5vdCB0aGUgZGF0YWJhc2UgKHBsYW5uZWQsIHNlZSByb2FkbWFwKS4KLSAqKkQxIGhhcyBubyBuYXRpdmUgVFRMKio6IGV4cGlyZWQgcGFzdGVzIGFsd2F5cyByZXR1cm4gNDA0IG9uIHJlYWQgKGV4cGlyeSBpcyBjaGVja2VkIHBlciByZXF1ZXN0KSwgYnV0IHBoeXNpY2FsIGRlbGV0aW9uIGhhcHBlbnMgaW4gYSBzY2hlZHVsZWQgY2xlYW51cCBqb2Ig4oCUIGFuIGV4cGlyZWQgcGFzdGUncyBjaXBoZXJ0ZXh0IG1heSBzaXQgaW4gc3RvcmFnZSB1bnRpbCB0aGUgbmV4dCBjbGVhbnVwIHJ1bi4KLSAqKlRoZSBEMSBwcmltYXJ5IGxpdmVzIGluIGEgc2luZ2xlIHJlZ2lvbioqOiByZWFkcyBmYXIgZnJvbSB0aGF0IHJlZ2lvbiBwYXkgYSByb3VuZCB0cmlwICh0eXBpY2FsbHkgdGVucyB0byBhIGZldyBodW5kcmVkIG1pbGxpc2Vjb25kcykuIFBhc3RlcyBhcmUgcmVhZC1vbmNlIGNvbGQgZGF0YSwgc28gdGhpcyBpcyBhIGRlbGliZXJhdGUgdHJhZGUgZm9yIHN0cm9uZyBjb25zaXN0ZW5jeSBhbmQgYXRvbWljIGJ1cm5zLgotICoqRnJlZS10aWVyIGVudmVsb3BlKio6IDEwMCwwMDAgcm93cyB3cml0dGVuL2RheSwgNSBtaWxsaW9uIHJvd3MgcmVhZC9kYXksIDUwMCBNQiBwZXIgZGF0YWJhc2UgKDUgR0IgcGVyIGFjY291bnQpIOKAlCBhbXBsZSBmb3IgYSBwZXJzb25hbCBzZWxmLWhvc3RlZCBpbnN0YW5jZSAob25lIGRlcGxveW1lbnQgPSBvbmUgcXVvdGEpOyBwdWJsaWMgZGVtbyBpbnN0YW5jZXMgc3RpbGwgbmVlZCByYXRlIGxpbWl0aW5nLgoKIyMgUm9hZG1hcAoKU2VlIFtST0FETUFQLm1kXShkb2NzL1JPQURNQVAubWQpLgoKIyMgTGljZW5zZQoKVGhpcyBwcm9qZWN0J3Mgb3duIGNvZGUgaXMgcmVsZWFzZWQgdW5kZXIgdGhlIFtNSVQgTGljZW5zZV0oTElDRU5TRSkuCgpVcHN0cmVhbSBhdHRyaWJ1dGlvbiBhbmQgdGhlIG5vbi1hZmZpbGlhdGlvbiAvIG5vbi1jb21wYXRpYmlsaXR5IHN0YXRlbWVudHMgbGl2ZSBpbiBbTk9USUNFXShOT1RJQ0UpLgo=
+<p align="center">
+  <img src="docs/logo.png" alt="Binflare logo" width="440">
+</p>
+
+# Binflare
+
+**A zero-knowledge pastebin that runs entirely on Cloudflare Workers and D1 — no server to host, no runtime to maintain.**
+
+Pastes are encrypted in your browser (AES-256-GCM via WebCrypto) before they are uploaded. The server only ever stores ciphertext; the decryption key lives exclusively in the URL `#fragment` and is never sent to the server.
+
+> 🚧 **Status: stage 0 — project scaffolding.** Core implementation in progress. This repository is private during incubation and will be made public at v0.1.
+
+## Upstream & attribution
+
+This project is an **independent, clean-room reimplementation inspired by [PrivateBin](https://github.com/PrivateBin/PrivateBin)** by [@PrivateBin](https://github.com/PrivateBin) — originally created by Sébastien Sauvage.
+
+- 🔗 Upstream repository: https://github.com/PrivateBin/PrivateBin
+- 👤 Upstream organization: [@PrivateBin](https://github.com/PrivateBin)
+- 📜 Upstream license: Zlib/libpng — full attribution in [NOTICE](NOTICE)
+
+This is **not a fork** of PrivateBin, **not an official port**, and it is **not affiliated with or endorsed by** the PrivateBin project. No upstream code has been copied; none of upstream's bundled third-party libraries (including the GPLv2-licensed rawinflate) and none of its CC-BY-licensed artwork are used. Client-side compression and encryption are reimplemented on WebCrypto.
+
+## ⚠️ Compatibility notice
+
+**Pastes are NOT compatible with upstream PrivateBin.** Links and data formats differ (the client-side encryption format is different), so pastes created here cannot be opened in PrivateBin, and vice versa. This project is a new implementation, not a migration tool.
+
+## Security model
+
+- Encryption happens **client-side only** (WebCrypto, AES-256-GCM). The key is generated in the browser and carried in the URL `#fragment`, which browsers never send to servers.
+- The server stores ciphertext + metadata only (expiry, burn flag, delete-token hash — tokens are stored as SHA-256 hashes, never in plain text).
+- Storage is Cloudflare D1 (SQLite) with **strong consistency**: a paste is readable everywhere the moment it is created. Burn-after-reading is a single atomic `DELETE … RETURNING` statement — exactly one reader can ever retrieve a burn paste. Expiry is checked on every read, and a scheduled cleanup job reclaims storage.
+
+### Limitations (stated honestly)
+
+- **Maximum paste size is 2 MB** (D1's per-row limit — the same default size limit as upstream PrivateBin). Larger payloads and attachments belong in R2, not the database (planned, see roadmap).
+- **D1 has no native TTL**: expired pastes always return 404 on read (expiry is checked per request), but physical deletion happens in a scheduled cleanup job — an expired paste's ciphertext may sit in storage until the next cleanup run.
+- **The D1 primary lives in a single region**: reads far from that region pay a round trip (typically tens to a few hundred milliseconds). Pastes are read-once cold data, so this is a deliberate trade for strong consistency and atomic burns.
+- **Free-tier envelope**: 100,000 rows written/day, 5 million rows read/day, 500 MB per database (5 GB per account) — ample for a personal self-hosted instance (one deployment = one quota); public demo instances still need rate limiting.
+
+## Roadmap
+
+See [ROADMAP.md](docs/ROADMAP.md).
+
+## License
+
+This project's own code is released under the [MIT License](LICENSE).
+
+Upstream attribution and the non-affiliation / non-compatibility statements live in [NOTICE](NOTICE).
