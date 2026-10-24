@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" alt="Binflare logo" width="440">
+</p>
+
 # Binflare
 
 **A zero-knowledge pastebin that runs entirely on Cloudflare — no server, no PHP runtime, no patches to apply.**
@@ -35,7 +39,7 @@ This is **not a fork** of PrivateBin, **not an official port**, and it is **not 
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md).
+See [ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 
