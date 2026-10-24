@@ -6,8 +6,6 @@ Pastes are encrypted in your browser (AES-256-GCM via WebCrypto) before they are
 
 > 🚧 **Status: stage 0 — project scaffolding.** Core implementation in progress. This repository is private during incubation and will be made public at v0.1.
 
-零知识加密粘贴板，跑在 Cloudflare Workers + D1 上：浏览器端加密，服务端只存密文，没有服务器要维护。
-
 ## Upstream & attribution
 
 This project is an **independent, clean-room reimplementation inspired by [PrivateBin](https://github.com/PrivateBin/PrivateBin)** by [@PrivateBin](https://github.com/PrivateBin) — originally created by Sébastien Sauvage.
