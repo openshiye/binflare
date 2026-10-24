@@ -1,3 +1,4 @@
+import { bytesToBase64 } from '../lib/binary'
 import { fnv1a64Hex } from '../lib/fnv'
 import { EXPIRY_OPTIONS } from '../lib/protocol'
 import { getConfig, type AppConfig } from './config'
@@ -89,6 +90,31 @@ function commentView(row: CommentRow): ReadPasteResult['comments'][number] {
   }
 }
 
+async function ciphertextFor(env: Env, row: PasteRow): Promise<string> {
+  if (!row.r2_key) {
+    return ciphertextBase64(row)
+  }
+  if (!env.PASTES) {
+    throw new ServiceError(500, 'storage', 'Large-paste storage is not configured.')
+  }
+  const object = await env.PASTES.get(row.r2_key)
+  if (!object) {
+    throw notFound()
+  }
+  return bytesToBase64(new Uint8Array(await object.arrayBuffer()))
+}
+
+async function deleteR2(env: Env, key: string | null): Promise<void> {
+  if (!key || !env.PASTES) {
+    return
+  }
+  try {
+    await env.PASTES.delete(key)
+  } catch (error) {
+    console.error('binflare: failed to delete R2 ciphertext', error)
+  }
+}
+
 async function enforceRateLimit(
   env: Env,
   config: AppConfig,
@@ -144,11 +170,34 @@ export async function createPaste(
   const id = fnv1a64Hex(payload.ct)
   const salt = randomHex(256)
   const token = await deleteToken(id, salt)
+  const useR2 = payload.ctBytes.length > config.d1MaxCtBytes
+  let r2Key: string | null = null
+
+  if (useR2) {
+    if (!env.PASTES) {
+      throw new ServiceError(
+        413,
+        'payload_too_large',
+        'Large-paste storage is not configured.',
+      )
+    }
+    const existing = await getPaste(env.DB, id)
+    if (existing) {
+      throw new ServiceError(409, 'collision', COLLISION)
+    }
+    r2Key = `pastes/${id}`
+    try {
+      await env.PASTES.put(r2Key, payload.ctBytes)
+    } catch (error) {
+      console.error('binflare: failed to store R2 ciphertext', error)
+      throw new ServiceError(500, 'storage', 'Could not save the document.')
+    }
+  }
 
   const inserted = await insertPaste(env.DB, {
     id,
     v: 2,
-    ctBytes: payload.ctBytes,
+    ctBytes: useR2 ? new Uint8Array() : payload.ctBytes,
     adataJson: payload.adataJson,
     formatter: payload.formatter,
     discussion: payload.discussion,
@@ -157,8 +206,15 @@ export async function createPaste(
     salt,
     size: payload.ctBytes.length,
     createdAt: nowSeconds,
+    r2Key,
   })
   if (!inserted) {
+    if (useR2) {
+      const existing = await getPaste(env.DB, id)
+      if (!existing) {
+        await deleteR2(env, r2Key)
+      }
+    }
     throw new ServiceError(409, 'collision', COLLISION)
   }
 
@@ -173,18 +229,26 @@ export async function readPaste(env: Env, id: string): Promise<ReadPasteResult> 
   }
   if (row.expire_date !== null && row.expire_date <= nowSeconds) {
     await deletePasteCascade(env.DB, id)
+    await deleteR2(env, row.r2_key)
     throw notFound()
   }
 
   let resultRow: PasteRow = row
+  let ciphertext: string
   let burned = false
   if (row.burn === 1) {
+    // Fetch large ciphertext before the destructive D1 batch; the batch still
+    // decides which concurrent reader is allowed to return it.
+    ciphertext = await ciphertextFor(env, row)
     const burnedRow = await burnPaste(env.DB, id)
     if (!burnedRow) {
       throw notFound()
     }
     resultRow = burnedRow
     burned = true
+    await deleteR2(env, burnedRow.r2_key)
+  } else {
+    ciphertext = await ciphertextFor(env, row)
   }
 
   const adata = parseAdata(resultRow.adata)
@@ -197,7 +261,7 @@ export async function readPaste(env: Env, id: string): Promise<ReadPasteResult> 
   return {
     v: resultRow.v,
     adata,
-    ct: ciphertextBase64(resultRow),
+    ct: ciphertext,
     meta,
     comments,
     comment_count: comments.length,
@@ -214,12 +278,14 @@ export async function deletePaste(env: Env, id: string, token: string): Promise<
   }
   if (row.expire_date !== null && row.expire_date <= nowSeconds) {
     await deletePasteCascade(env.DB, id)
+    await deleteR2(env, row.r2_key)
     throw notFound()
   }
   if (!(await verifyDeleteToken(id, row.salt, token))) {
     throw new ServiceError(403, 'forbidden', WRONG_TOKEN)
   }
   await deletePasteCascade(env.DB, id)
+  await deleteR2(env, row.r2_key)
 }
 
 export async function createComment(

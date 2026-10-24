@@ -13,6 +13,7 @@ export interface PasteRow {
   salt: string
   size: number
   created_at: number
+  r2_key: string | null
 }
 
 export interface CommentRow {
@@ -38,7 +39,7 @@ export function ciphertextBase64(row: { ct: ArrayBuffer | Uint8Array }): string 
 export async function getPaste(db: D1Database, id: string): Promise<PasteRow | null> {
   return db
     .prepare(
-      'SELECT id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at FROM pastes WHERE id = ?',
+      'SELECT id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at, r2_key FROM pastes WHERE id = ?',
     )
     .bind(id)
     .first<PasteRow>()
@@ -47,11 +48,11 @@ export async function getPaste(db: D1Database, id: string): Promise<PasteRow | n
 export async function getPasteForDelete(
   db: D1Database,
   id: string,
-): Promise<Pick<PasteRow, 'id' | 'salt' | 'expire_date'> | null> {
+): Promise<Pick<PasteRow, 'id' | 'salt' | 'expire_date' | 'r2_key'> | null> {
   return db
-    .prepare('SELECT id, salt, expire_date FROM pastes WHERE id = ?')
+    .prepare('SELECT id, salt, expire_date, r2_key FROM pastes WHERE id = ?')
     .bind(id)
-    .first<Pick<PasteRow, 'id' | 'salt' | 'expire_date'>>()
+    .first<Pick<PasteRow, 'id' | 'salt' | 'expire_date' | 'r2_key'>>()
 }
 
 export async function insertPaste(
@@ -68,12 +69,13 @@ export async function insertPaste(
     salt: string
     size: number
     createdAt: number
+    r2Key: string | null
   },
 ): Promise<boolean> {
   try {
     await db
       .prepare(
-        'INSERT INTO pastes (id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO pastes (id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at, r2_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       )
       .bind(
         record.id,
@@ -87,6 +89,7 @@ export async function insertPaste(
         record.salt,
         record.size,
         record.createdAt,
+        record.r2Key,
       )
       .run()
     return true
@@ -169,7 +172,7 @@ export async function burnPaste(db: D1Database, id: string): Promise<PasteRow | 
   const [selected] = await db.batch([
     db
       .prepare(
-        'SELECT id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at FROM pastes WHERE id = ?',
+        'SELECT id, v, ct, adata, formatter, discussion, burn, expire_date, salt, size, created_at, r2_key FROM pastes WHERE id = ?',
       )
       .bind(id),
     db.prepare('DELETE FROM comments WHERE paste_id = ?').bind(id),
@@ -183,25 +186,37 @@ export async function listExpired(
   db: D1Database,
   now: number,
   limit: number,
-): Promise<string[]> {
+): Promise<Array<{ id: string; r2Key: string | null }>> {
   const result = await db
-    .prepare('SELECT id FROM pastes WHERE expire_date IS NOT NULL AND expire_date <= ? LIMIT ?')
+    .prepare(
+      'SELECT id, r2_key FROM pastes WHERE expire_date IS NOT NULL AND expire_date <= ? LIMIT ?',
+    )
     .bind(now, limit)
-    .all<{ id: string }>()
-  return (result.results ?? []).map((row) => row.id)
+    .all<{ id: string; r2_key: string | null }>()
+  return (result.results ?? []).map((row) => ({ id: row.id, r2Key: row.r2_key }))
 }
 
-export async function purgeExpired(db: D1Database, now: number, limit = 100): Promise<number> {
-  const ids = await listExpired(db, now, limit)
-  if (ids.length === 0) {
+export async function purgeExpired(
+  db: D1Database,
+  r2: R2Bucket | undefined,
+  now: number,
+  limit = 100,
+): Promise<number> {
+  const rows = await listExpired(db, now, limit)
+  if (rows.length === 0) {
     return 0
   }
+  const ids = rows.map((row) => row.id)
   const placeholders = ids.map(() => '?').join(', ')
   await db.batch([
     db.prepare(`DELETE FROM comments WHERE paste_id IN (${placeholders})`).bind(...ids),
     db.prepare(`DELETE FROM pastes WHERE id IN (${placeholders})`).bind(...ids),
   ])
-  return ids.length
+  const keys = rows.map((row) => row.r2Key).filter((key): key is string => key !== null)
+  if (r2 && keys.length > 0) {
+    await r2.delete(keys)
+  }
+  return rows.length
 }
 
 export async function purgeOrphanComments(db: D1Database): Promise<void> {

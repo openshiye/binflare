@@ -86,4 +86,26 @@ describe('D1 service', () => {
     const row = await env.DB.prepare('SELECT id FROM pastes WHERE id = ?').bind(created.id).first()
     expect(row).toBeNull()
   })
+
+  it('stores large ciphertext in R2 and reads it back', async () => {
+    const bytes = new Uint8Array(1_875_001)
+    for (let index = 0; index < bytes.length; index++) {
+      bytes[index] = index % 251
+    }
+    // Build the base64 string in chunks to avoid a huge spread call.
+    let binary = ''
+    for (let index = 0; index < bytes.length; index += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + 0x8000))
+    }
+    const largeCt = btoa(binary)
+    const created = await makePaste(largeCt)
+    const row = await env.DB.prepare('SELECT r2_key FROM pastes WHERE id = ?')
+      .bind(created.id)
+      .first<{ r2_key: string }>()
+    expect(row?.r2_key).toBe(`pastes/${created.id}`)
+    const read = await readPaste(env, created.id)
+    expect(read.ct).toBe(largeCt)
+    await deletePaste(env, created.id, created.deleteToken)
+    await expect(env.PASTES.get(`pastes/${created.id}`)).resolves.toBeNull()
+  })
 })

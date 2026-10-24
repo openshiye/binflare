@@ -12,7 +12,7 @@
     "directory": "./dist/client",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/*", "!/assets/*", "!/favicon.svg", "!/robots.txt"]
+    "run_worker_first": ["/*", "!/assets/*", "!/favicon.svg", "!/robots.txt", "!/theme.js"]
   },
   "d1_databases": [
     {
@@ -22,12 +22,20 @@
       "migrations_dir": "migrations"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "PASTES",
+      "bucket_name": "binflare-pastes"
+    }
+  ],
   "triggers": {
     "crons": ["*/15 * * * *"]
   },
   "vars": {
     "MAX_PASTE_CT_BYTES": "1875000",
     "MAX_PASTE_CT_BASE64": "2500000",
+    "MAX_R2_CT_BYTES": "10000000",
+    "MAX_R2_CT_BASE64": "13400000",
     "RATE_LIMIT_WINDOW_SECONDS": "10",
     "RATE_LIMIT_MAX_REQUESTS": "1",
     "TURNSTILE_SITE_KEY": "",

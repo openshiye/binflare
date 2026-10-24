@@ -4,7 +4,7 @@ export async function purge(env: Env, nowMs = Date.now()): Promise<{ pastes: num
   const nowSeconds = Math.floor(nowMs / 1000)
   let pastes = 0
   for (let batch = 0; batch < 5; batch++) {
-    const deleted = await purgeExpired(env.DB, nowSeconds, 100)
+    const deleted = await purgeExpired(env.DB, env.PASTES, nowSeconds, 100)
     pastes += deleted
     if (deleted < 100) {
       break
