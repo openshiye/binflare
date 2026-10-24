@@ -1,0 +1,57 @@
+{
+  "name": "binflare",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "packageManager": "pnpm@10.19.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "postinstall": "wrangler types",
+    "dev": "vite dev",
+    "build": "vite build && tsc --noEmit",
+    "preview": "vite preview",
+    "preview:worker": "pnpm build && wrangler dev --config dist/server/wrangler.json --persist-to .wrangler/state",
+    "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
+    "cf-typegen": "wrangler types",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run tests/unit",
+    "test:workers": "vitest run --config vitest.workers.config.ts",
+    "test:compat": "vitest run --config vitest.compat.config.ts",
+    "e2e:serve": "pnpm build && node scripts/start-e2e-server.mjs",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "1.170.46",
+    "@tanstack/react-start": "1.169.4",
+    "dompurify": "3.4.17",
+    "highlight.js": "11.12.0",
+    "marked": "18.1.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.65.0",
+    "@cloudflare/vitest-pool-workers": "0.23.0",
+    "@playwright/test": "1.64.1",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.0.1",
+    "@vitest/runner": "4.1.12",
+    "@vitest/snapshot": "4.1.12",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.0.14",
+    "vitest": "4.1.12",
+    "wrangler": "4.152.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "workerd"]
+  }
+}

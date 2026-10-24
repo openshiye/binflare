@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "binflare",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/server.ts",
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/*", "!/assets/*", "!/favicon.svg", "!/robots.txt"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "binflare",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "vars": {
+    "MAX_PASTE_CT_BYTES": "1875000",
+    "MAX_PASTE_CT_BASE64": "2500000",
+    "RATE_LIMIT_WINDOW_SECONDS": "10",
+    "RATE_LIMIT_MAX_REQUESTS": "1",
+    "TURNSTILE_SITE_KEY": "",
+    "CORS_ORIGIN": ""
+  }
+}
