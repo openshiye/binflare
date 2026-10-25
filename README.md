@@ -146,14 +146,33 @@ Deploy command: npm run deploy
 
 Do not replace the deploy command with the default `npx wrangler deploy`; that would use the committed placeholder D1 ID before the button has finished provisioning.
 
-```text
-Build command: npm run build
-Deploy command: npm run deploy
+### After deploying: configure R2 lifecycle
+
+The button provisions R2, but Cloudflare's build token may not be allowed to change bucket lifecycle settings. Configure this once after deployment.
+
+Dashboard:
+
+1. Open **R2 Object Storage** in the Cloudflare dashboard.
+2. Select the deployed bucket, normally `binflare-pastes`.
+3. Open **Settings → Object lifecycle rules**.
+4. Create a rule:
+   - Rule name: `expire-pastes-after-366-days`
+   - Prefix: `pastes/`
+   - Action: **Delete objects**
+   - Age: `31622400` seconds (366 days)
+5. Save and confirm the rule is enabled.
+
+CLI:
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID=<account-id>
+export CLOUDFLARE_API_TOKEN=<token-with-workers-r2-storage-edit>
+pnpm run r2:lifecycle binflare-pastes
 ```
 
-Do not replace the deploy command with the default `npx wrangler deploy`; that would use the committed placeholder D1 ID before the button has finished provisioning.
+Why this matters: burn/delete/expiry remove the D1 row first and then best-effort delete the R2 object. If that second delete fails, the lifecycle rule bounds how long orphaned ciphertext can remain. It does not make burn atomic across D1 and R2.
 
-Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. The Cloudflare deploy button becomes usable once the repository is public. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist.
+Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist.
 
 ## API
 

@@ -146,7 +146,33 @@ Deploy command: npm run deploy
 
 不要把部署命令改回默认的 `npx wrangler deploy`；那会在按钮完成资源开通前使用仓库里的占位 D1 ID。
 
-需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。仓库公开后，Cloudflare 一键部署按钮才可用。完整清单见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
+### 部署后：配置 R2 lifecycle
+
+按钮会自动开通 R2，但 Cloudflare 的构建令牌不一定有权限修改桶的生命周期规则。部署完成后请手动配置一次。
+
+控制台：
+
+1. 打开 Cloudflare 控制台的 **R2 Object Storage**。
+2. 选择部署出来的桶，通常名为 `binflare-pastes`。
+3. 进入 **Settings → Object lifecycle rules**。
+4. 新建规则：
+   - Rule name：`expire-pastes-after-366-days`
+   - Prefix：`pastes/`
+   - Action：**Delete objects**
+   - Age：`31622400` 秒（366 天）
+5. 保存并确认规则已启用。
+
+命令行：
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID=<account-id>
+export CLOUDFLARE_API_TOKEN=<token-with-workers-r2-storage-edit>
+pnpm run r2:lifecycle binflare-pastes
+```
+
+原因：焚毁、删除和过期会先删除 D1 行，再尽力删除 R2 对象。若第二步失败，生命周期规则能限制孤儿密文的最长留存时间；它不能把 D1 和 R2 的焚毁变成严格原子事务。
+
+需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。完整清单见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 
 ## API
 

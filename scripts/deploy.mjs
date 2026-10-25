@@ -85,7 +85,10 @@ async function configureR2Lifecycle(bucketName) {
     }
     console.log(`Configured R2 lifecycle rule on ${bucketName}`)
   } catch (error) {
-    console.warn(`R2 lifecycle was not configured: ${error instanceof Error ? error.message : String(error)}`)
+    console.warn(
+      `R2 lifecycle was not configured: ${error instanceof Error ? error.message : String(error)}. ` +
+        `Run pnpm run r2:lifecycle with an R2 write token, or configure it in the Cloudflare dashboard.`,
+    )
   }
 }
 

@@ -17,6 +17,7 @@
     "deploy": "node scripts/deploy.mjs",
     "deploy:dry-run": "node scripts/deploy.mjs --dry-run",
     "setup:cloudflare": "node scripts/setup-cloudflare.mjs",
+    "r2:lifecycle": "node scripts/configure-r2-lifecycle.mjs",
     "cf-typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",

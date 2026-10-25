@@ -24,9 +24,14 @@ This is the operational closeout. The repository is public; `wrangler.jsonc` kee
    The setup script is idempotent: it finds or creates D1 `binflare`, creates R2 `binflare-pastes`, records the checked-in migrations in `d1_migrations`, configures the lifecycle rule and writes `.env.deploy`. Do not commit `.env.deploy`.
 
 3. **R2 lifecycle rule (release blocker)**
-   - `pnpm setup:cloudflare` configures `expire-pastes-after-366-days` on `pastes/`.
+   - For a local/operator deployment, `pnpm setup:cloudflare` configures `expire-pastes-after-366-days` on `pastes/`.
+   - For a Cloudflare button deployment, the build token may not have R2 lifecycle permission. Configure the rule once after the Worker is deployed:
+     ```bash
+     pnpm run r2:lifecycle binflare-pastes
+     ```
+     Or use the dashboard: **R2 → bucket → Settings → Object lifecycle rules → Create rule**, prefix `pastes/`, delete objects after `31622400` seconds (366 days).
    - Why: burn/delete/expiry delete the D1 row first and then best-effort delete the R2 object. If the R2 delete fails, ciphertext can remain orphaned. The lifecycle rule bounds that residual exposure; it does not make burn perfectly atomic across D1 and R2.
-   - Record the rule in the release notes/operator runbook. Do not deploy a public instance with R2 enabled and no lifecycle rule.
+   - Record the rule in the release notes/operator runbook. Do not announce a public instance with R2 enabled and no lifecycle rule.
 
 4. **Configure optional services**
    ```bash
@@ -44,7 +49,7 @@ This is the operational closeout. The repository is public; `wrangler.jsonc` kee
    ```bash
    pnpm run deploy
    ```
-   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, deploys the Worker, and configures the R2 lifecycle rule when the deploy token has R2 access. The Worker initializes the D1 schema on its first API request, so the Cloudflare deploy button does not need direct D1 query permission. The button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
+   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, deploys the Worker, and attempts the R2 lifecycle rule. If the token lacks R2 access, follow step 3. The Worker initializes the D1 schema on its first API request, so the Cloudflare deploy button does not need direct D1 query permission. The button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
 
 7. **Post-deploy smoke**
    - The first `GET /api/health` request initializes the D1 schema.
