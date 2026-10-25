@@ -1,6 +1,4 @@
 blank_issues_enabled: true
-blank_issues_title: Question or something else
-blank_issues_labels: ["question"]
 contact_links:
   - name: Report a vulnerability (private)
     url: https://github.com/openshiye/binflare/security/advisories/new
