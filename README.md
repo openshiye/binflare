@@ -15,6 +15,8 @@
   </a>
 </p>
 
+**Live preview:** <https://binflare.199595.xyz>
+
 **A zero-knowledge pastebin on Cloudflare Workers, D1 and R2, speaking the PrivateBin v2 protocol.**
 
 Pastes are encrypted in the browser before upload. The server stores ciphertext and the minimum metadata needed for expiry, burn-after-reading, comments and deletion. The decryption key lives only in the URL `#fragment` and is never sent to the server.

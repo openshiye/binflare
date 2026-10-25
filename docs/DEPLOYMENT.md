@@ -1,6 +1,6 @@
 # Deployment and release checklist
 
-This is the operational closeout. The repository is currently private; `wrangler.jsonc` keeps a placeholder D1 ID, and the maintainer's real IDs live in the ignored `.env.deploy`. The deployed instance is <https://binflare.openshiye.workers.dev>.
+This is the operational closeout. The repository is public; `wrangler.jsonc` keeps a placeholder D1 ID, and the maintainer's real IDs live in the ignored `.env.deploy`. The deployed instance is <https://binflare.199595.xyz> (Worker custom hostname on the `199595.xyz` zone).
 
 ## Prerequisites
 
