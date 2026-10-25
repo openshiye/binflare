@@ -183,4 +183,4 @@ Error body:
 
 ## Not part of the API
 
-JSON-LD, URL shortener proxies, template selection and admin operations are not implemented. Requests for those paths may return 404.
+JSON-LD, URL shortener proxies, template selection and admin operations are not implemented. Requests for those paths may return 404. `GET /?jsonld=...` is routed to the compatibility error response and returns no metadata; do not treat it as a supported endpoint.

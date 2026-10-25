@@ -45,7 +45,7 @@ Binflare protects paste content from the storage layer and from an honest-but-cu
 
 ## Storage and cleanup
 
-- Small ciphertext is in D1; large ciphertext is in R2. Burn/delete/expiry remove the D1 row first, then the R2 object. If the R2 delete fails, the D1 row is gone but ciphertext may remain orphaned; use R2 lifecycle rules or operator cleanup for strict hygiene.
+- Small ciphertext is in D1; large ciphertext is in R2. Burn/delete/expiry remove the D1 row first, then the R2 object. If the R2 delete fails, the D1 row is gone but ciphertext may remain orphaned; configure an R2 lifecycle rule before public deployment and use it as the backstop. The release checklist in [DEPLOYMENT.md](DEPLOYMENT.md) treats the rule as a blocker.
 - A deployment without an R2 binding is limited to the D1 ciphertext cap (1.875 MB). With R2, the default ciphertext cap is 10 MB.
 - The service does not log request bodies, keys, passwords, ciphertext or raw IPs. Rate-limit keys use SHA-256 of the IP.
 - Errors returned to clients are generic for missing/expired/burned/deleted pastes to avoid an existence oracle.

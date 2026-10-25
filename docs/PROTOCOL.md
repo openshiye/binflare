@@ -216,7 +216,7 @@ Burn/delete/expiry remove the D1 row and then the R2 object. If the R2 delete fa
 ## Not supported
 
 - v1/ZeroBin payloads.
-- JSON-LD endpoints.
+- JSON-LD endpoints, including `?jsonld=` (the root handler returns a compatibility error, not metadata).
 - Server-side URL shortener proxies.
 - Template switching, admin CLI, alternate storage backends.
 - Import/migration of data from an existing instance.

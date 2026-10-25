@@ -23,7 +23,7 @@ Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare i
 | Sharing | Copy, raw, download, clone, email, QR | Same, including raw/download/email/QR/clone | Preserve |
 | Password | Client-side only; no recovery | Same; burn+password prompts before the destructive read | Preserve |
 | Dark mode / i18n | 39 locales, Bootstrap themes | English/Simplified Chinese, dark/light theme; more locales future | Adapt |
-| JSON-LD | Public metadata endpoints | Not implemented | Reject |
+| JSON-LD | Public metadata endpoints, including `?jsonld=` | Not implemented; `?jsonld=` is routed to the error response, not metadata | Reject |
 | Shortener proxies | YOURLS/Shlink/Chhoto | Not implemented; optional external integration future | Reject |
 | Template switching / admin CLI | PHP-specific | Not implemented | Reject |
 | Storage backends | FS/DB/S3/GCS | D1 + R2 | Adapt |

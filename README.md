@@ -4,6 +4,8 @@
 
 # Binflare
 
+[![CI](https://github.com/openshiye/binflare/actions/workflows/ci.yml/badge.svg)](https://github.com/openshiye/binflare/actions/workflows/ci.yml)
+
 **A zero-knowledge pastebin on Cloudflare Workers and D1, speaking the PrivateBin v2 protocol.**
 
 Pastes are encrypted in the browser before upload. The server stores ciphertext and the minimum metadata needed for expiry, burn-after-reading, comments and deletion. The decryption key lives only in the URL `#fragment` and is never sent to the server.
@@ -71,7 +73,7 @@ Browser (static SPA shell)
 - **Comments**: no pagination, no per-comment deletion; comments are removed with the paste.
 - **No data migration**: existing PrivateBin pastes are not imported. The protocol is compatible; the data is not moved.
 - **Not implemented**: v1/ZeroBin, JSON-LD, URL shortener proxies, template switching, admin CLI, multi-backend storage, automatic data migration from another instance, and translations beyond English/Simplified Chinese. These are documented as non-goals or optional integrations in [PARITY](docs/PARITY.md).
-- **Free-tier envelope**: D1 free plan is 5M rows read/day, 100K rows written/day and 500 MB per database (5 GB per account); Workers free plan is 100K requests/day with 10 ms CPU. R2 has its own free storage/operation allowance. Static assets are not billed per request. Public demos should enable rate limiting and optionally Turnstile. Local measurements for the maximum 1.875 MB D1 ciphertext: ~156 ms create and ~77 ms read wall time (including local D1/network); the Workers runtime FNV takes ~25–27 ms CPU for the 2.5 MB base64 string, so max-size D1 requests can exceed the free plan's 10 ms CPU. Lower `MAX_PASTE_CT_BYTES`, use a paid plan, or rely on the R2 path for large attachments.
+- **Free-tier envelope**: D1 free plan is 5M rows read/day, 100K rows written/day and 500 MB per database (5 GB per account); Workers free plan is 100K requests/day with 10 ms CPU. R2 has its own free storage/operation allowance. Static assets are not billed per request. Public demos should enable rate limiting and optionally Turnstile. Local measurements for the maximum 1.875 MB D1 ciphertext: ~156 ms create and ~77 ms read wall time (including local D1/network); the Workers runtime FNV takes ~25–27 ms CPU for the 2.5 MB base64 string, so max-size D1 requests can exceed the free plan's 10 ms CPU. The 10 MB R2 path is not free-plan CPU-safe either: measured FNV over the 13.3 MB base64 string is ~125 ms and a local 10 MB read is ~73 ms wall. Use Workers Paid for heavy large-paste usage, or lower the caps.
 
 ## Stack
 
@@ -128,6 +130,7 @@ Full contracts and examples: [docs/API.md](docs/API.md).
 - [Architecture](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
 - [Security](docs/SECURITY.md)
+- [Deployment and release checklist](docs/DEPLOYMENT.md)
 - [Roadmap](docs/ROADMAP.md)
 
 ## Upstream attribution

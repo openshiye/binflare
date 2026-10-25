@@ -71,7 +71,7 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 - **评论**：无分页、不能单条删除；随粘贴一起删除。
 - **不迁移数据**：不导入已有 PrivateBin 粘贴；协议兼容，但数据不搬家。
 - **未实现**：v1/ZeroBin、JSON-LD、短链代理、模板切换、admin CLI、多存储后端、从其他实例自动迁移数据、英/简中之外的语言。均在 [PARITY](docs/PARITY.md) 中列为 non-goal 或可选集成。
-- **免费额度**：D1 免费版 5M 行读/天、100K 行写/天、单库 500 MB（账户 5 GB）；Workers 免费版 100K 请求/天、10 ms CPU；R2 有独立免费存储/操作额度；静态资源不按请求计费。公共演示应开启限流，可选 Turnstile。本地实测最大 1.875 MB D1 密文创建约 156 ms、读取约 77 ms（含本地 D1/网络）；Workers 运行时对 2.5 MB base64 的 FNV 约 25–27 ms CPU，满尺寸 D1 请求可能超过免费版 10 ms CPU。必要时降低 `MAX_PASTE_CT_BYTES`、使用付费计划，或让大附件走 R2。
+- **免费额度**：D1 免费版 5M 行读/天、100K 行写/天、单库 500 MB（账户 5 GB）；Workers 免费版 100K 请求/天、10 ms CPU；R2 有独立免费存储/操作额度；静态资源不按请求计费。公共演示应开启限流，可选 Turnstile。本地实测最大 1.875 MB D1 密文创建约 156 ms、读取约 77 ms（含本地 D1/网络）；Workers 运行时对 2.5 MB base64 的 FNV 约 25–27 ms CPU，满尺寸 D1 请求可能超过免费版 10 ms CPU。10 MB R2 路径同样不是免费版 CPU 安全区：13.3 MB base64 的 FNV 约 125 ms，本地 10 MB 读取约 73 ms wall。重度大粘贴请使用 Workers Paid，或降低上限。
 
 ## 技术栈
 
@@ -128,6 +128,7 @@ pnpm deploy
 - [架构](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
 - [安全](docs/SECURITY.md)
+- [部署与发布清单](docs/DEPLOYMENT.md)
 - [路线图](docs/ROADMAP.md)
 
 ## 上游致谢

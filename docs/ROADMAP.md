@@ -43,3 +43,5 @@ Release gate: an existing PrivateBin client can talk to Binflare by changing the
 ## Version policy
 
 TanStack Start, Router, Vite, React, Wrangler and the Cloudflare Vite plugin are pinned to exact versions. Upgrades are separate changes with the full compatibility harness and E2E suite. The PrivateBin protocol baseline is pinned to a release tag in `docs/PROTOCOL.md` and `tests/compat/baseline.json`; do not track a floating major/minor.
+
+The release checklist (CI, D1/R2 creation, R2 lifecycle rule, migrations, deploy smoke, large-paste CPU) is in [DEPLOYMENT.md](DEPLOYMENT.md).
