@@ -4,9 +4,25 @@
 
 # Binflare
 
-**跑在 Cloudflare Workers + D1 上的零知识粘贴板，使用 PrivateBin v2 协议。**
+[![CI](https://github.com/openshiye/binflare/actions/workflows/ci.yml/badge.svg)](https://github.com/openshiye/binflare/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Protocol: PrivateBin 2.1.0](https://img.shields.io/badge/protocol-PrivateBin%202.1.0-0f766e)](docs/PROTOCOL.md)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F6871F?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+
+<p align="center">
+  <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/openshiye/binflare">
+    <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare Workers">
+  </a>
+</p>
+
+**跑在 Cloudflare Workers + D1 + R2 上的零知识粘贴板，使用 PrivateBin v2 协议。**
 
 粘贴在浏览器端完成加密后再上传。服务端只保存密文，以及过期、焚毁、评论和删除所必需的最小元数据。解密密钥只存在于 URL 的 `#fragment`，不会发送到服务端。
+
+<p align="center">
+  <img src="docs/screenshots/editor-light.png" alt="Binflare 浅色编辑器" width="49%">
+  <img src="docs/screenshots/editor-dark.png" alt="Binflare 深色编辑器" width="49%">
+</p>
 
 ## 协议兼容
 
@@ -16,7 +32,7 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 - 协议基线固定在 [`docs/PROTOCOL.md`](docs/PROTOCOL.md)；不支持 v1/ZeroBin。
 - Binflare **不导入、不迁移**已有实例中的粘贴。改域名只对目标实例上已有的数据生效；旧粘贴留在原实例。
 
-> **Binflare 是独立实现，与 PrivateBin 项目无隶属、无背书，也不是官方移植。** PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。见 [NOTICE](NOTICE)。
+> **Binflare 是源自 PrivateBin 的 Cloudflare 重写/衍生项目，基于 PrivateBin 2.1.0 的 v2 协议与 JSON API。** 这是修改版本，不是 PrivateBin 原项目。PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。见 [NOTICE](NOTICE)。
 
 ## 能力
 
@@ -85,13 +101,11 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 
 ## 快速开始
 
-前置：Node.js >= 22、pnpm、Cloudflare 账号、Wrangler 登录。
+前置：Node.js >= 22、pnpm、Cloudflare 账号。
 
 ```bash
 pnpm install
-# 创建 D1 和 R2，把 D1 id 写进 wrangler.jsonc
-pnpm exec wrangler d1 create binflare
-pnpm exec wrangler r2 bucket create binflare-pastes
+cp .env.deploy.example .env.deploy
 pnpm db:migrate:local
 pnpm dev
 ```
@@ -104,14 +118,22 @@ pnpm dev
 pnpm preview:worker
 ```
 
-生产部署：
+## 部署
+
+仓库里的 `wrangler.jsonc` 使用占位 D1 ID。真实账号和数据库 ID 放在被 Git 忽略的 `.env.deploy`；`scripts/deploy.mjs` 会在构建后把它们注入生成的 Worker 配置。
 
 ```bash
-pnpm db:migrate:remote
-pnpm deploy
+export CLOUDFLARE_ACCOUNT_ID=<account-id>
+export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
+
+pnpm setup:cloudflare       # 创建或复用 D1/R2、迁移 schema、配置 lifecycle，并写 .env.deploy
+pnpm run deploy:dry-run     # 校验生成的 Worker 配置
+pnpm run deploy             # 构建、注入 .env.deploy 并部署
 ```
 
-需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。仓库公开后可使用一键 Deploy to Cloudflare 按钮。绑定、Cron 和配置见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+`pnpm deploy` 是 pnpm 内置命令，所以本项目使用 `pnpm run deploy`。
+
+需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。仓库公开后，Cloudflare 一键部署按钮才可用。完整清单见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 
 ## API
 
@@ -129,13 +151,15 @@ pnpm deploy
 - [API](docs/API.md)
 - [安全](docs/SECURITY.md)
 - [部署与发布清单](docs/DEPLOYMENT.md)
+- [贡献指南](CONTRIBUTING.md)
 - [路线图](docs/ROADMAP.md)
+- [GitHub Issues](https://github.com/openshiye/binflare/issues)
 
 ## 上游致谢
 
-Binflare 是 PrivateBin 协议的独立重实现。未复制上游源码、资产或捆绑第三方库（包括 GPLv2 的 rawinflate）。协议基线是 PrivateBin 2.1.0 release。PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。
+Binflare 是源自 [PrivateBin](https://github.com/PrivateBin/PrivateBin) 的 Cloudflare 重写版本。未复制上游源码、资产或捆绑第三方库（包括 GPLv2 的 rawinflate）。协议基线是 [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0)。PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。
 
-**Binflare 与 PrivateBin 项目无隶属、无背书，也不是官方发行版。**
+**Binflare 是 PrivateBin 的衍生修改版本，不是原项目。** 完整致谢和兼容范围见 [NOTICE](NOTICE)。
 
 ## 许可证
 

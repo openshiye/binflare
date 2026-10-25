@@ -1,6 +1,6 @@
 # Deployment and release checklist
 
-This is the operational closeout. The repository is private and the checked-in `wrangler.jsonc` contains a placeholder `database_id`; deployment is a separate decision.
+This is the operational closeout. The repository is currently private; `wrangler.jsonc` keeps a placeholder D1 ID, and the maintainer's real IDs live in the ignored `.env.deploy`. The deployed instance is <https://binflare.openshiye.workers.dev>.
 
 ## Prerequisites
 
@@ -12,41 +12,39 @@ This is the operational closeout. The repository is private and the checked-in `
 ## Release checklist
 
 1. **CI green**
-   - `.github/workflows/ci.yml` must pass on `main`: typecheck, unit, Workers/D1, project-owned compatibility fixtures, production build, E2E.
+   - `.github/workflows/ci.yml` must pass on `main`: typecheck, unit, Workers/D1, project-owned compatibility fixtures, production build, deploy dry-run, E2E.
    - Compatibility is checked by `tests/compat/fixtures.json`, captured once from PrivateBin `2.1.0` and its PHP hash functions. CI does not checkout upstream or run Docker. When intentionally moving the baseline, regenerate/verify the fixtures as a separate change and update `docs/PROTOCOL.md` and `tests/compat/baseline.json`.
 
-2. **Create resources**
+2. **Create or reuse resources**
    ```bash
-   pnpm exec wrangler d1 create binflare
-   pnpm exec wrangler r2 bucket create binflare-pastes
+   export CLOUDFLARE_ACCOUNT_ID=<account-id>
+   export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
+   pnpm setup:cloudflare
    ```
-   Put the returned D1 `database_id` into `wrangler.jsonc`. Create the R2 bucket before deploying the R2 binding.
+   The setup script is idempotent: it finds or creates D1 `binflare`, creates R2 `binflare-pastes`, applies the checked-in migrations, configures the lifecycle rule and writes `.env.deploy`. Do not commit `.env.deploy`.
 
 3. **R2 lifecycle rule (release blocker)**
-   - Configure an R2 lifecycle rule on `binflare-pastes` that expires objects after the maximum supported retention plus a small buffer (for example, 366 days).
+   - `pnpm setup:cloudflare` configures `expire-pastes-after-366-days` on `pastes/`.
    - Why: burn/delete/expiry delete the D1 row first and then best-effort delete the R2 object. If the R2 delete fails, ciphertext can remain orphaned. The lifecycle rule bounds that residual exposure; it does not make burn perfectly atomic across D1 and R2.
    - Record the rule in the release notes/operator runbook. Do not deploy a public instance with R2 enabled and no lifecycle rule.
 
-4. **Migrate and configure**
+4. **Configure optional services**
    ```bash
-   pnpm db:migrate:remote
-   # optional public demo
    pnpm exec wrangler secret put TURNSTILE_SECRET
    ```
    Set `TURNSTILE_SITE_KEY` as a var if Turnstile is enabled. Review `CORS_ORIGIN`, rate-limit vars, and `MAX_*` caps.
 
 5. **Preflight**
    ```bash
-   pnpm build
-   pnpm exec wrangler deploy --config dist/server/wrangler.json --dry-run
+   pnpm run deploy:dry-run
    ```
    Confirm D1, R2, ASSETS and vars appear in the dry-run output.
 
 6. **Deploy**
    ```bash
-   pnpm deploy
+   pnpm run deploy
    ```
-   `pnpm deploy` targets the generated `dist/server/wrangler.json` so the Vite/TanStack server bundle and assets are used.
+   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` into `dist/server/wrangler.json`, and deploys the generated Worker. Use `pnpm run deploy`; `pnpm deploy` is a pnpm built-in command.
 
 7. **Post-deploy smoke**
    - `GET /api/health` returns `{ok:true}`.
@@ -55,6 +53,7 @@ This is the operational closeout. The repository is private and the checked-in `
    - Create a paste above the D1 cap (for example, 3 MB ciphertext) to exercise R2.
    - Upload a text/image/SVG attachment and verify preview/download.
    - Verify CSP/nonce headers on `/`, `/about`, API `no-store`.
+   - Load `/about` directly and confirm the browser console has no React hydration errors.
    - Trigger/observe one Cron cleanup run.
 
 8. **Large-paste CPU note**
@@ -63,4 +62,4 @@ This is the operational closeout. The repository is private and the checked-in `
 
 ## Cloudflare MCP
 
-The Cloudflare MCP connector is configured in the Qoder app, but its tools were not exposed in the session used to implement this repository. Use it (or `wrangler`) only after the account authorization and resource IDs are confirmed. Never put API tokens or account secrets in the repository.
+The Cloudflare MCP connector can create and inspect D1/R2 resources and deploy a Worker bundle through the API. It cannot read local build artifacts, so use `pnpm run deploy` (or a short-lived scoped API token created through the connector) for the full TanStack asset build. Never commit API tokens or account secrets.

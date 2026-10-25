@@ -5,10 +5,24 @@
 # Binflare
 
 [![CI](https://github.com/openshiye/binflare/actions/workflows/ci.yml/badge.svg)](https://github.com/openshiye/binflare/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Protocol: PrivateBin 2.1.0](https://img.shields.io/badge/protocol-PrivateBin%202.1.0-0f766e)](docs/PROTOCOL.md)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F6871F?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-**A zero-knowledge pastebin on Cloudflare Workers and D1, speaking the PrivateBin v2 protocol.**
+<p align="center">
+  <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/openshiye/binflare">
+    <img src="https://deploy.workers.cloudflare.com/button" alt="Deploy to Cloudflare Workers">
+  </a>
+</p>
+
+**A zero-knowledge pastebin on Cloudflare Workers, D1 and R2, speaking the PrivateBin v2 protocol.**
 
 Pastes are encrypted in the browser before upload. The server stores ciphertext and the minimum metadata needed for expiry, burn-after-reading, comments and deletion. The decryption key lives only in the URL `#fragment` and is never sent to the server.
+
+<p align="center">
+  <img src="docs/screenshots/editor-light.png" alt="Binflare editor in light mode" width="49%">
+  <img src="docs/screenshots/editor-dark.png" alt="Binflare editor in dark mode" width="49%">
+</p>
 
 ## Protocol compatibility
 
@@ -18,7 +32,7 @@ Binflare implements the **PrivateBin v2 wire format and JSON API** as shipped in
 - The protocol baseline is pinned in [`docs/PROTOCOL.md`](docs/PROTOCOL.md). There is no v1/ZeroBin support.
 - Binflare does **not** import or migrate pastes from an existing instance. Changing a host only works for data that exists on that host; old pastes stay on their original instance.
 
-> **Binflare is an independent implementation. It is not affiliated with, endorsed by, or an official port of the PrivateBin project.** PrivateBin is © Sébastien Sauvage and contributors and is licensed under Zlib/libpng. See [NOTICE](NOTICE).
+> **Binflare is a Cloudflare-native rewrite derived from PrivateBin, based on the PrivateBin 2.1.0 v2 protocol and JSON API.** This is a modified version, not the original PrivateBin project. PrivateBin is © Sébastien Sauvage and contributors and is licensed under Zlib/libpng. See [NOTICE](NOTICE).
 
 ## What works
 
@@ -87,33 +101,39 @@ Exact package versions are pinned in `package.json`; upgrades are separate chang
 
 ## Quick start
 
-Prerequisites: Node.js >= 22, pnpm, a Cloudflare account, and Wrangler login.
+Prerequisites: Node.js >= 22, pnpm and a Cloudflare account.
 
 ```bash
 pnpm install
-# create the D1 database and R2 bucket; put the D1 id into wrangler.jsonc
-pnpm exec wrangler d1 create binflare
-pnpm exec wrangler r2 bucket create binflare-pastes
+cp .env.deploy.example .env.deploy
 pnpm db:migrate:local
 pnpm dev
 ```
 
 Open `http://localhost:3000`.
 
-`pnpm dev` runs the Vite dev server. To exercise the built Worker (including the nonce/CSP layer and the root compatibility API), run:
+`pnpm dev` runs the Vite dev server. To exercise the built Worker, including the nonce/CSP layer and the root compatibility API, run:
 
 ```bash
 pnpm preview:worker
 ```
 
-For a production deploy:
+## Deploy
+
+The committed `wrangler.jsonc` uses a placeholder D1 ID. Keep your account and database IDs in the ignored `.env.deploy` file; `scripts/deploy.mjs` injects them into the generated Worker config after build.
 
 ```bash
-pnpm db:migrate:remote
-pnpm deploy
+export CLOUDFLARE_ACCOUNT_ID=<account-id>
+export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
+
+pnpm setup:cloudflare       # create/reuse D1 + R2, apply migrations, set lifecycle, write .env.deploy
+pnpm run deploy:dry-run     # validate the generated Worker config
+pnpm run deploy             # build, inject .env.deploy and deploy
 ```
 
-Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. The optional one-click Deploy to Cloudflare button becomes usable when the repository is public. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for bindings, Cron and configuration.
+`pnpm deploy` is reserved by pnpm itself, so use `pnpm run deploy` for this project.
+
+Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. The Cloudflare deploy button becomes usable once the repository is public. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist.
 
 ## API
 
@@ -131,13 +151,15 @@ Full contracts and examples: [docs/API.md](docs/API.md).
 - [API](docs/API.md)
 - [Security](docs/SECURITY.md)
 - [Deployment and release checklist](docs/DEPLOYMENT.md)
+- [Contributing](CONTRIBUTING.md)
 - [Roadmap](docs/ROADMAP.md)
+- [GitHub issues](https://github.com/openshiye/binflare/issues)
 
 ## Upstream attribution
 
-Binflare is an independent reimplementation of the PrivateBin protocol. No upstream source code, assets, or bundled third-party libraries (including the GPLv2-licensed rawinflate) are used. The protocol baseline is the PrivateBin 2.1.0 release. PrivateBin is © Sébastien Sauvage and the PrivateBin contributors and is licensed under Zlib/libpng.
+Binflare is a Cloudflare-native rewrite derived from [PrivateBin](https://github.com/PrivateBin/PrivateBin). No upstream source code, assets, or bundled third-party libraries (including the GPLv2-licensed rawinflate) are used. The protocol baseline is the [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0). PrivateBin is © Sébastien Sauvage and the PrivateBin contributors and is licensed under Zlib/libpng.
 
-**Binflare is not affiliated with or endorsed by the PrivateBin project, and is not an official PrivateBin distribution.**
+**Binflare is a derived, modified version; it is not the original PrivateBin project.** See [NOTICE](NOTICE) for the full attribution and compatibility scope.
 
 ## License
 
