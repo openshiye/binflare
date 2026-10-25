@@ -1,0 +1,130 @@
+<!-- GitHub social preview source, 1280x640.
+<!-- Render: capture this file in Chromium at 1280x640 with deviceScaleFactor 2, then
+<!--       downscale to 1280 wide (sips --resampleWidth 1280 in.png --out docs/social-preview.png).
+<!--       Keep the output under 1 MB; GitHub stores it as an opaque upload. -->
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #18181b;
+    --muted: #71717a;
+    --border: #e4e4e7;
+    --primary: #0f766e;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+  .tint {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(560px 420px at 82% 46%, rgba(15, 118, 110, 0.075), transparent 68%),
+      radial-gradient(760px 300px at 0% 100%, rgba(24, 24, 27, 0.045), transparent 70%);
+  }
+  .grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  }
+  .frame {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 336px;
+    align-items: center;
+    gap: 56px;
+    padding: 0 76px;
+  }
+  h1 {
+    font-size: 62px;
+    line-height: 1.03;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    text-wrap: balance;
+    max-width: 15ch;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--primary);
+  }
+  .lede {
+    margin-top: 22px;
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 46ch;
+    text-wrap: pretty;
+  }
+  .meta {
+    margin-top: 34px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    color: var(--fg);
+  }
+  .meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+  .meta .dim { color: var(--muted); }
+  .mark {
+    display: grid;
+    place-items: center;
+  }
+  .mark img {
+    width: 344px;
+    height: auto;
+    display: block;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 48px -24px rgba(24, 24, 27, 0.22);
+  }
+  .edge {
+    position: absolute;
+    left: 76px;
+    bottom: 46px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .rule {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: linear-gradient(180deg, var(--primary), rgba(15, 118, 110, 0.25));
+  }
+</style>
+<div class="tint"></div>
+<div class="grain"></div>
+<div class="rule"></div>
+<div class="frame">
+  <div>
+    <h1>Zero&#8209;knowledge pastes on the <em>edge</em>.</h1>
+    <p class="lede">
+      Encryption happens in the browser. Workers, D1 and R2 store the ciphertext — no PHP,
+      no server to patch.
+    </p>
+    <div class="meta">
+      <span>PrivateBin 2.1.0 protocol</span>
+      <span class="dot"></span>
+      <span>MIT licensed</span>
+      <span class="dot"></span>
+      <span class="dim">self-host in one deploy</span>
+    </div>
+  </div>
+  <div class="mark"><img src="./logo.png" alt="Binflare logo" /></div>
+</div>
+<div class="edge">binflare.199595.xyz&ensp;·&ensp;github.com/openshiye/binflare</div>
