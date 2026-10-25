@@ -1,4 +1,15 @@
 import { useState } from 'react'
+import {
+  Copy,
+  Download,
+  FileText,
+  Link2,
+  LoaderCircle,
+  Mail,
+  QrCode,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react'
 import type { ReadResponse } from '../lib/api-client'
 import { copyText } from '../lib/clipboard'
 import { formatTimeToLive } from '../lib/format'
@@ -8,6 +19,10 @@ import type { PasteTarget } from '../lib/fragment'
 import { AttachmentList, ChildrenLinks, ContentRenderer } from './content'
 import { Comments, type DecryptedComment } from './comments'
 import { useI18n } from '../lib/i18n'
+import { Button, buttonVariants } from './ui/button'
+import { Card, CardContent, CardDescription } from './ui/card'
+import { Badge } from './ui/badge'
+import { AppDialog, DialogFooter } from './ui/dialog'
 
 export interface CreatedInfo {
   deleteUrl: string
@@ -95,97 +110,130 @@ export function Viewer({
   }
 
   return (
-    <section className="viewer" aria-labelledby="document-title">
+    <section className="space-y-5" aria-labelledby="document-title">
       {created ? (
-        <div className="alert success" role="status">
-          <strong>{t('Document created.')}</strong>{' '}
-          {t('Copy the link now; the delete link is shown only in this session.')}
-          <div className="created-actions">
-            <button type="button" className="button secondary small" onClick={() => void copy(pasteUrl, t('Link copied.'))}>
+        <div
+          role="status"
+          className="rounded-xl border border-success/30 bg-success/10 p-4 text-sm"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <strong>{t('Document created.')}</strong>
+            <span className="text-muted-foreground">
+              {t('Copy the link now; the delete link is shown only in this session.')}
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" onClick={() => void copy(pasteUrl, t('Link copied.'))}>
+              <Link2 />
               {t('Copy link')}
-            </button>
-            <a className="button secondary small" href={created.deleteUrl}>
+            </Button>
+            <a
+              href={created.deleteUrl}
+              className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+            >
+              <Trash2 />
               {t('Delete this document')}
             </a>
           </div>
-          <p className="muted small">
+          <p className="mt-2 text-xs text-muted-foreground">
             {t('The delete link contains a secret token. Anyone with it can delete the document.')}
           </p>
         </div>
       ) : null}
 
       {response.burned ? (
-        <div className="alert warning" role="status">
+        <div
+          role="status"
+          className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning"
+        >
           {t('This burn-after-reading document was destroyed after it was read. Reloading the link will not recover it.')}
         </div>
       ) : null}
 
       {mode !== 'gcm' ? (
-        <div className="alert warning" role="status">
+        <div
+          role="status"
+          className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning"
+        >
           {t('This legacy document uses')} <code>{mode.toUpperCase()}</code>
           {t('which is not authenticated. It is read-only for compatibility; Binflare always creates AES-GCM documents.')}
         </div>
       ) : null}
 
-      <div className="viewer-heading">
-        <div>
-          <p className="eyebrow">
-            {format === 'markdown' ? t('Markdown') : format === 'syntaxhighlighting' ? t('Code') : t('Text')}
-            {' · '}
-            {target.burn ? t('Burn after reading') : t('Document')}
-          </p>
-          <h1 id="document-title">{t('Shared document')}</h1>
-          <p className="meta-line">
+      <div className="flex flex-col gap-4">
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">
+              {format === 'markdown' ? t('Markdown') : format === 'syntaxhighlighting' ? t('Code') : t('Text')}
+            </Badge>
+            <Badge variant={target.burn ? 'destructive' : 'outline'}>
+              {target.burn ? t('Burn after reading') : t('Document')}
+            </Badge>
+            {response.burned ? <Badge variant="warning">{t('Destroyed')}</Badge> : null}
+          </div>
+          <h1 id="document-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {t('Shared document')}
+          </h1>
+          <CardDescription>
             {timeToLive !== undefined
               ? `${t('Expires in')} ${formatTimeToLive(timeToLive)}`
               : t('No expiry')}
             {discussion ? ` · ${t('Open discussion')}` : ''}
-            {response.burned ? ` · ${t('Destroyed')}` : ''}
-          </p>
+          </CardDescription>
         </div>
-        <div className="viewer-actions">
-          <button type="button" className="button secondary small" onClick={() => void copy(pasteUrl, t('Link copied.'))}>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => void copy(pasteUrl, t('Link copied.'))}>
+            <Link2 />
             {t('Copy link')}
-          </button>
-          <button type="button" className="button secondary small" onClick={() => void copy(payload.paste, t('Document copied.'))}>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void copy(payload.paste, t('Document copied.'))}>
+            <Copy />
             {t('Copy text')}
-          </button>
-          <button type="button" className="button secondary small" onClick={downloadText}>
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadText}>
+            <Download />
             {t('Download')}
-          </button>
-          <button type="button" className="button secondary small" onClick={() => setModal('raw')}>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setModal('raw')}>
+            <FileText />
             {t('Raw text')}
-          </button>
+          </Button>
           {canShareLink ? (
             <>
-              <button type="button" className="button secondary small" onClick={emailLink}>
+              <Button variant="outline" size="sm" onClick={emailLink}>
+                <Mail />
                 {t('Email')}
-              </button>
-              <button type="button" className="button secondary small" onClick={() => void showQr()}>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => void showQr()}>
+                <QrCode />
                 {t('QR code')}
-              </button>
-              <button
-                type="button"
-                className="button secondary small"
-                onClick={() => onClone({ payload, format, pasteUrl })}
-              >
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onClone({ payload, format, pasteUrl })}>
+                <RotateCcw />
                 {t('Clone')}
-              </button>
+              </Button>
             </>
           ) : null}
-          <button type="button" className="button ghost small" onClick={onNew}>
+          <Button variant="ghost" size="sm" onClick={onNew}>
             {t('New')}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {notice ? <div className="alert info" role="status">{notice}</div> : null}
+      {notice ? (
+        <div role="status" className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm">
+          {notice}
+        </div>
+      ) : null}
 
-      <div className="card document-card">
-        <ContentRenderer text={payload.paste} format={format} />
-        <AttachmentList payload={payload} />
-        <ChildrenLinks children={payload.children} />
-      </div>
+      <Card className="overflow-hidden">
+        <CardContent className="p-4 sm:p-6">
+          <ContentRenderer text={payload.paste} format={format} />
+          <AttachmentList payload={payload} />
+          <ChildrenLinks children={payload.children} />
+        </CardContent>
+      </Card>
 
       {discussion ? (
         <Comments
@@ -198,46 +246,48 @@ export function Viewer({
         />
       ) : null}
 
-      <p className="muted small footer-note">
+      <p className="text-xs leading-5 text-muted-foreground">
         {t('This page decrypted the document locally. The server only stored ciphertext.')}
       </p>
 
-      {modal === 'raw' ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="raw-title">
-          <div className="modal raw-modal">
-            <p className="eyebrow">{t('Raw document')}</p>
-            <h2 id="raw-title">{t('Plain text')}</h2>
-            <pre className="raw-text">{payload.paste}</pre>
-            <div className="form-actions">
-              <button type="button" className="button secondary small" onClick={() => void copy(payload.paste, t('Document copied.'))}>
-                {t('Copy text')}
-              </button>
-              <button type="button" className="button secondary small" onClick={downloadText}>
-                {t('Download')}
-              </button>
-              <button type="button" className="button ghost small" onClick={() => setModal(null)}>
-                {t('Close')}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <AppDialog
+        open={modal === 'raw'}
+        onOpenChange={(open) => setModal(open ? 'raw' : null)}
+        title={t('Plain text')}
+        description={t('Raw document')}
+        className="modal max-w-4xl"
+      >
+        <pre className="raw-text">{payload.paste}</pre>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => void copy(payload.paste, t('Document copied.'))}>
+            {t('Copy text')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadText}>
+            {t('Download')}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setModal(null)}>
+            {t('Close')}
+          </Button>
+        </DialogFooter>
+      </AppDialog>
 
-      {modal === 'qr' ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="qr-title">
-          <div className="modal qr-modal">
-            <p className="eyebrow">{t('Share')}</p>
-            <h2 id="qr-title">{t('QR code')}</h2>
-            {qrDataUrl ? <img src={qrDataUrl} alt={t('QR code')} className="qr-image" /> : null}
-            <p className="alert warning small">
-              {t('This QR code contains the decryption key. Anyone who can see or scan it can read the document.')}
-            </p>
-            <button type="button" className="button ghost small" onClick={() => setModal(null)}>
-              {t('Close')}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <AppDialog
+        open={modal === 'qr'}
+        onOpenChange={(open) => setModal(open ? 'qr' : null)}
+        title={t('QR code')}
+        description={t('Share')}
+        className="modal max-w-md text-center"
+      >
+        {qrDataUrl ? <img src={qrDataUrl} alt={t('QR code')} className="qr-image" /> : <LoaderCircle className="mx-auto size-8 animate-spin" />}
+        <p className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-left text-xs text-warning">
+          {t('This QR code contains the decryption key. Anyone who can see or scan it can read the document.')}
+        </p>
+        <DialogFooter>
+          <Button variant="ghost" size="sm" onClick={() => setModal(null)}>
+            {t('Close')}
+          </Button>
+        </DialogFooter>
+      </AppDialog>
     </section>
   )
 }

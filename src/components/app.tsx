@@ -26,7 +26,12 @@ import { PasswordModal } from './password-modal'
 import { Viewer, type CreatedInfo } from './viewer'
 import type { DecryptedComment } from './comments'
 import { SiteHeader } from './site-header'
+import { SiteFooter } from './site-footer'
+import { AppShellSkeleton } from './app-shell-skeleton'
+import { Button } from './ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { useI18n } from '../lib/i18n'
+import { useMounted } from '../lib/use-mounted'
 
 type Screen = 'boot' | 'create' | 'loading' | 'burn-confirm' | 'burn-password' | 'password' | 'view' | 'error'
 
@@ -87,6 +92,7 @@ function messageFor(error: unknown, t: (key: string, vars?: Record<string, strin
 
 export function App() {
   const { t } = useI18n()
+  const mounted = useMounted()
   const [insecure, setInsecure] = useState(false)
   const [config, setConfig] = useState<ClientConfig>(FALLBACK_CONFIG)
   const [screen, setScreen] = useState<Screen>('boot')
@@ -342,21 +348,34 @@ export function App() {
     await load(target, password, true)
   }
 
+  if (!mounted) {
+    return <AppShellSkeleton />
+  }
+
   return (
-    <div className="app-shell">
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader onHome={handleNew} current="home" />
 
-      <main className="site-main">
+      <main id="main-content" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {insecure ? (
-          <div className="alert error" role="alert">
+          <div
+            role="alert"
+            className="mb-5 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+          >
             {t('This site requires HTTPS. WebCrypto is unavailable in an insecure context.')}
           </div>
         ) : null}
+
         {screen === 'boot' || screen === 'loading' ? (
-          <div className="screen-center">
-            <p className="eyebrow">{t('Encrypted document')}</p>
-            <p className="loading-line">{t('Decrypting locally…')}</p>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardDescription>{t('Encrypted document')}</CardDescription>
+              <CardTitle>{t('Decrypting locally…')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-40 animate-pulse rounded-lg bg-muted" />
+            </CardContent>
+          </Card>
         ) : null}
 
         {screen === 'create' ? (
@@ -371,21 +390,25 @@ export function App() {
         ) : null}
 
         {screen === 'burn-confirm' && target ? (
-          <section className="screen-center card confirm-card">
-            <p className="eyebrow">{t('Burn after reading')}</p>
-            <h1>{t('Read once, then it is gone.')}</h1>
-            <p className="muted">
-              {t('Opening this document deletes it on the server. There is no second chance and no recovery.')}
-            </p>
-            <div className="form-actions">
-              <button type="button" className="button primary" onClick={handleBurnConfirm}>
-                {t('Read and destroy')}
-              </button>
-              <button type="button" className="button ghost" onClick={handleNew}>
-                {t('Cancel')}
-              </button>
-            </div>
-          </section>
+          <Card className="mx-auto max-w-2xl">
+            <CardHeader>
+              <CardDescription>{t('Burn after reading')}</CardDescription>
+              <CardTitle>{t('Read once, then it is gone.')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <CardDescription>
+                {t('Opening this document deletes it on the server. There is no second chance and no recovery.')}
+              </CardDescription>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="destructive" onClick={handleBurnConfirm}>
+                  {t('Read and destroy')}
+                </Button>
+                <Button variant="ghost" onClick={handleNew}>
+                  {t('Cancel')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : null}
 
         {screen === 'password' ? (
@@ -403,14 +426,16 @@ export function App() {
         ) : null}
 
         {screen === 'error' ? (
-          <section className="screen-center card error-card">
-            <p className="eyebrow">{t('Unable to open')}</p>
-            <h1>{t('Document unavailable')}</h1>
-            <p className="muted">{error}</p>
-            <button type="button" className="button primary" onClick={handleNew}>
-              {t('Create a new document')}
-            </button>
-          </section>
+          <Card className="mx-auto max-w-2xl">
+            <CardHeader>
+              <CardDescription>{t('Unable to open')}</CardDescription>
+              <CardTitle>{t('Document unavailable')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <CardDescription>{error}</CardDescription>
+              <Button onClick={handleNew}>{t('Create a new document')}</Button>
+            </CardContent>
+          </Card>
         ) : null}
 
         {screen === 'view' && target && response && payload && keyBytes ? (
@@ -432,10 +457,7 @@ export function App() {
         ) : null}
       </main>
 
-      <footer className="site-footer">
-        <span>{t('Protocol-compatible with PrivateBin 2.1.0.')}</span>
-        <span>{t('Not affiliated with or endorsed by the PrivateBin project.')}</span>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

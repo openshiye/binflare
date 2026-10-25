@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react'
+import { LoaderCircle, MessageSquarePlus, Reply } from 'lucide-react'
 import { createCommentCipher } from '../lib/crypto'
 import { postComment } from '../lib/api-client'
 import { linkifyText } from '../lib/linkify'
 import { formatCreated } from '../lib/format'
 import { TurnstileWidget } from './turnstile'
 import { useI18n } from '../lib/i18n'
+import { Button } from './ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Textarea } from './ui/textarea'
 
 export interface DecryptedComment {
   id: string
@@ -94,36 +100,46 @@ function CommentForm({
   }
 
   return (
-    <form className="comment-form" onSubmit={submit}>
-      <label className="field compact">
-        <span>{t('Nickname (optional)')}</span>
-        <input
-          value={nickname}
-          onChange={(event) => setNickname(event.target.value)}
-          maxLength={80}
-          autoComplete="nickname"
-        />
-      </label>
-      <label className="field">
-        <span>{t('Comment')}</span>
-        <textarea
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          rows={4}
-          spellCheck={false}
-          placeholder={t('Write a comment…')}
-        />
-      </label>
+    <form className="space-y-3 rounded-xl border bg-muted/20 p-3 sm:p-4" onSubmit={submit}>
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
+        <div className="space-y-2">
+          <Label htmlFor={`nickname-${parentId}`}>{t('Nickname (optional)')}</Label>
+          <Input
+            id={`nickname-${parentId}`}
+            value={nickname}
+            onChange={(event) => setNickname(event.target.value)}
+            maxLength={80}
+            autoComplete="nickname"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor={`comment-${parentId}`}>{t('Comment')}</Label>
+          <Textarea
+            id={`comment-${parentId}`}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            rows={4}
+            spellCheck={false}
+            placeholder={t('Write a comment…')}
+            className="min-h-24"
+          />
+        </div>
+      </div>
       {siteKey ? <TurnstileWidget key={turnstileKey} siteKey={siteKey} onToken={setTurnstileToken} /> : null}
-      {error ? <div className="alert error" role="alert">{error}</div> : null}
-      <div className="form-actions">
-        <button type="submit" className="button primary small" disabled={busy || text.trim().length === 0}>
+      {error ? (
+        <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" size="sm" disabled={busy || text.trim().length === 0}>
+          {busy ? <LoaderCircle className="animate-spin" /> : <MessageSquarePlus />}
           {busy ? t('Posting…') : t('Post comment')}
-        </button>
+        </Button>
         {onCancel ? (
-          <button type="button" className="button ghost small" onClick={onCancel} disabled={busy}>
+          <Button type="button" variant="ghost" size="sm" onClick={onCancel} disabled={busy}>
             {t('Cancel')}
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>
@@ -160,39 +176,46 @@ function CommentThread({
   const children = childrenByParent.get(comment.id) ?? []
 
   return (
-    <li className="comment" style={{ marginLeft: depth === 0 ? 0 : '1.25rem' }}>
-      <div className="comment-meta">
+    <li className={`border-l-2 py-3 pl-4 ${depth === 0 ? 'border-border' : 'ml-4 border-muted-foreground/30'}`}>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
         <CommentAvatar id={comment.id} />
-        <strong className={comment.nickname ? '' : 'anonymous'}>
+        <strong className={comment.nickname ? 'text-foreground' : 'font-normal text-muted-foreground'}>
           {comment.nickname || t('Anonymous')}
         </strong>
-        {comment.created ? <time dateTime={new Date(comment.created * 1000).toISOString()}>{formatCreated(comment.created)}</time> : null}
+        {comment.created ? (
+          <time dateTime={new Date(comment.created * 1000).toISOString()} className="font-mono text-muted-foreground">
+            {formatCreated(comment.created)}
+          </time>
+        ) : null}
       </div>
-      <div className="comment-body">
+      <div className="mt-2 text-sm leading-6">
         {comment.error ? (
-          <span className="muted">{t('[Unable to decrypt this comment]')}</span>
+          <span className="text-muted-foreground">{t('[Unable to decrypt this comment]')}</span>
         ) : (
           <span className="whitespace-pre-wrap">{linkifyText(comment.text)}</span>
         )}
       </div>
       {!comment.error ? (
-        <button type="button" className="button ghost tiny" onClick={() => setReplying((value) => !value)}>
+        <Button variant="ghost" size="sm" className="mt-2 h-7 px-2 text-xs" onClick={() => setReplying((value) => !value)}>
+          <Reply />
           {replying ? t('Close reply') : t('Reply')}
-        </button>
+        </Button>
       ) : null}
       {replying ? (
-        <CommentForm
-          pasteId={pasteId}
-          parentId={comment.id}
-          keyBytes={keyBytes}
-          password={password}
-          siteKey={siteKey}
-          onPosted={onPosted}
-          onCancel={() => setReplying(false)}
-        />
+        <div className="mt-3">
+          <CommentForm
+            pasteId={pasteId}
+            parentId={comment.id}
+            keyBytes={keyBytes}
+            password={password}
+            siteKey={siteKey}
+            onPosted={onPosted}
+            onCancel={() => setReplying(false)}
+          />
+        </div>
       ) : null}
       {children.length > 0 ? (
-        <ul className="comment-children">
+        <ul className="mt-2 space-y-1">
           {children.map((child) => (
             <CommentThread
               key={child.id}
@@ -240,41 +263,47 @@ export function Comments({
   const { t } = useI18n()
 
   return (
-    <section className="discussion" aria-labelledby="discussion-title">
-      <div className="section-heading">
-        <h2 id="discussion-title">{t('Discussion')}</h2>
-        <span className="muted small">
-          {comments.length} {comments.length === 1 ? t('comment') : t('comments')}
-        </span>
-      </div>
-      {roots.length > 0 ? (
-        <ul className="comment-list">
-          {roots.map((comment) => (
-            <CommentThread
-              key={comment.id}
-              comment={comment}
-              childrenByParent={childrenByParent}
-              pasteId={pasteId}
-              keyBytes={keyBytes}
-              password={password}
-              siteKey={siteKey}
-              onPosted={onPosted}
-              depth={0}
-              seen={new Set()}
-            />
-          ))}
-        </ul>
-      ) : (
-        <p className="muted">{t('No comments yet.')}</p>
-      )}
-      <CommentForm
-        pasteId={pasteId}
-        parentId={pasteId}
-        keyBytes={keyBytes}
-        password={password}
-        siteKey={siteKey}
-        onPosted={onPosted}
-      />
-    </section>
+    <Card>
+      <CardHeader className="flex-row items-center justify-between gap-3">
+        <div>
+          <CardTitle id="discussion-title" className="text-base">
+            {t('Discussion')}
+          </CardTitle>
+          <CardDescription>
+            {comments.length} {comments.length === 1 ? t('comment') : t('comments')}
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {roots.length > 0 ? (
+          <ul className="space-y-1">
+            {roots.map((comment) => (
+              <CommentThread
+                key={comment.id}
+                comment={comment}
+                childrenByParent={childrenByParent}
+                pasteId={pasteId}
+                keyBytes={keyBytes}
+                password={password}
+                siteKey={siteKey}
+                onPosted={onPosted}
+                depth={0}
+                seen={new Set()}
+              />
+            ))}
+          </ul>
+        ) : (
+          <CardDescription>{t('No comments yet.')}</CardDescription>
+        )}
+        <CommentForm
+          pasteId={pasteId}
+          parentId={pasteId}
+          keyBytes={keyBytes}
+          password={password}
+          siteKey={siteKey}
+          onPosted={onPosted}
+        />
+      </CardContent>
+    </Card>
   )
 }

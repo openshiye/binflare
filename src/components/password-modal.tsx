@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { LoaderCircle } from 'lucide-react'
 import { useI18n } from '../lib/i18n'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { AppDialog } from './ui/dialog'
 
 export function PasswordModal({
   onSubmit,
@@ -25,37 +30,43 @@ export function PasswordModal({
   }, [])
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="password-title">
-      <div className="modal">
-        <p className="eyebrow">{t('Protected document')}</p>
-        <h1 id="password-title">{title ?? t('Password required')}</h1>
-        <p className="muted">
-          {description ?? t('This document was encrypted with a password. The server cannot verify or recover it.')}
-        </p>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault()
-            void onSubmit(password)
-          }}
-        >
-          <label className="field">
-            <span>{t('Password')}</span>
-            <input
-              ref={inputRef}
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              disabled={busy}
-            />
-          </label>
-          {error ? <div className="alert error" role="alert">{error}</div> : null}
-          <button type="submit" className="button primary" disabled={busy}>
-            {busy ? t('Working…') : submitLabel ?? t('Unlock')}
-          </button>
-        </form>
-        <p className="muted small">{t('The password is never sent to the server.')}</p>
-      </div>
-    </div>
+    <AppDialog
+      open
+      onOpenChange={() => undefined}
+      title={title ?? t('Password required')}
+      description={description ?? t('This document was encrypted with a password. The server cannot verify or recover it.')}
+      className="modal max-w-md"
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault()
+          void onSubmit(password)
+        }}
+        className="space-y-4"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="document-password">{t('Password')}</Label>
+          <Input
+            id="document-password"
+            ref={inputRef}
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={busy}
+          />
+        </div>
+        {error ? (
+          <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        ) : null}
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? <LoaderCircle className="animate-spin" /> : null}
+          {busy ? t('Working…') : submitLabel ?? t('Unlock')}
+        </Button>
+      </form>
+      <p className="text-xs leading-5 text-muted-foreground">{t('The password is never sent to the server.')}</p>
+    </AppDialog>
   )
 }

@@ -225,7 +225,7 @@ test('language and dark theme persist', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
   await page.getByRole('link', { name: '关于' }).click()
   await expect(
-    page.getByRole('heading', { name: 'PrivateBin 协议在 Cloudflare 上的实现。' }),
+    page.getByRole('heading', { name: '源自 PrivateBin 的 Cloudflare 重写。' }),
   ).toBeVisible()
 })
 
@@ -263,7 +263,7 @@ test('markdown is sanitized and the shell CSP uses a nonce', async ({ page, requ
 
   await page.goto('/about', { waitUntil: 'networkidle' })
   await expect(
-    page.getByRole('heading', { name: 'A Cloudflare implementation of the PrivateBin protocol.' }),
+    page.getByRole('heading', { name: 'A Cloudflare rewrite derived from PrivateBin.' }),
   ).toBeVisible()
 })
 

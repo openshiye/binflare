@@ -9,6 +9,7 @@ export const Route = createRootRoute({
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'robots', content: 'noindex, nofollow' },
       { name: 'referrer', content: 'no-referrer' },
+      { name: 'description', content: 'A zero-knowledge pastebin on Cloudflare Workers, compatible with the PrivateBin v2 protocol.' },
       { title: 'Binflare' },
     ],
     links: [{ rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
@@ -18,14 +19,17 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script src="/theme.js" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
+        <a className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground" href="#main-content">
+          Skip to content
+        </a>
         <noscript>
-          <div style={{ padding: '1rem', fontFamily: 'sans-serif' }}>
+          <div className="mx-auto max-w-2xl p-6 text-sm">
             Binflare requires JavaScript for client-side encryption.
           </div>
         </noscript>

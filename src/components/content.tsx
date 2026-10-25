@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Download, FileText } from 'lucide-react'
 import type { Formatter } from '../lib/protocol'
 import { linkifyText } from '../lib/linkify'
 import { normalizeAttachments, safeChildren, type Attachment } from '../lib/format'
@@ -14,6 +15,7 @@ import {
 } from '../lib/attachments'
 import { blobPart } from '../lib/binary'
 import { useI18n } from '../lib/i18n'
+import { buttonVariants } from './ui/button'
 
 let linkHookInstalled = false
 
@@ -169,14 +171,17 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   }, [attachment.url, kind])
 
   return (
-    <li className="attachment">
-      <div className="attachment-header">
-        <span className="attachment-name">{name}</span>
-        <span className="muted small">
+    <li className="overflow-hidden rounded-xl border bg-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 px-3 py-2">
+        <span className="inline-flex min-w-0 items-center gap-2 font-mono text-xs">
+          <FileText className="size-4 text-muted-foreground" />
+          <span className="truncate">{name}</span>
+        </span>
+        <span className="font-mono text-xs text-muted-foreground">
           {info?.mime ?? 'unknown type'} · {formatFileSize(size)}
         </span>
       </div>
-      <div className="attachment-preview">
+      <div className="attachment-preview p-3">
         {kind === 'image' ? <img src={attachment.url} alt={name} loading="lazy" /> : null}
         {kind === 'svg' && svgUrl ? <img src={svgUrl} alt={name} loading="lazy" /> : null}
         {kind === 'audio' ? <audio controls preload="metadata" src={attachment.url} /> : null}
@@ -188,12 +193,15 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
           <pre className="attachment-text">{text.slice(0, 200_000)}</pre>
         ) : null}
         {kind === null ? (
-          <p className="muted small">{t('Preview is disabled for this file type. Download it to view it.')}</p>
+          <p className="text-xs text-muted-foreground">{t('Preview is disabled for this file type. Download it to view it.')}</p>
         ) : null}
       </div>
-      <a href={attachment.url} download={name} className="button ghost small attachment-download">
-        {t('Download')}
-      </a>
+      <div className="border-t px-3 py-2">
+        <a href={attachment.url} download={name} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+          <Download />
+          {t('Download')}
+        </a>
+      </div>
     </li>
   )
 }
@@ -207,9 +215,9 @@ export function AttachmentList({ payload }: {
     return null
   }
   return (
-    <section className="attachments" aria-label={t('Attachments')}>
-      <h2>{t('Attachments')} ({attachments.length})</h2>
-      <ul>
+    <section className="mt-6 border-t pt-5" aria-label={t('Attachments')}>
+      <h2 className="mb-3 text-base font-semibold">{t('Attachments')} ({attachments.length})</h2>
+      <ul className="grid gap-3">
         {attachments.map((attachment) => (
           <AttachmentPreview
             key={`${attachment.name}-${attachment.url.slice(0, 32)}`}
@@ -228,12 +236,17 @@ export function ChildrenLinks({ children }: { children?: string[] }) {
     return null
   }
   return (
-    <section className="children" aria-label={t('Version chain')}>
-      <h2>{t('Version chain')}</h2>
-      <ul>
+    <section className="mt-6 border-t pt-5" aria-label={t('Version chain')}>
+      <h2 className="mb-3 text-base font-semibold">{t('Version chain')}</h2>
+      <ul className="space-y-2">
         {links.map((link) => (
           <li key={link}>
-            <a href={link} target="_blank" rel="noopener noreferrer">
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all font-mono text-xs underline-offset-4 hover:underline"
+            >
               {link}
             </a>
           </li>
@@ -245,7 +258,7 @@ export function ChildrenLinks({ children }: { children?: string[] }) {
 
 export function InlineError({ children }: { children: ReactNode }) {
   return (
-    <div className="alert error" role="alert">
+    <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
       {children}
     </div>
   )

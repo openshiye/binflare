@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Eye, EyeOff, FilePlus2, LoaderCircle, Paperclip, Trash2, X } from 'lucide-react'
 import type { ClientConfig } from '../lib/api-client'
 import type { ExpireKey, Formatter } from '../lib/protocol'
 import {
@@ -11,6 +12,11 @@ import {
 import { ContentRenderer } from './content'
 import { TurnstileWidget } from './turnstile'
 import { useI18n } from '../lib/i18n'
+import { Button } from './ui/button'
+import { Card, CardContent, CardDescription } from './ui/card'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
+import { Textarea } from './ui/textarea'
 
 export interface CreateInput {
   text: string
@@ -166,7 +172,6 @@ export function Editor({
 
   return (
     <section
-      className={dragging ? 'editor dragging' : 'editor'}
       aria-labelledby="editor-title"
       onDragOver={(event) => {
         event.preventDefault()
@@ -183,53 +188,59 @@ export function Editor({
         void addFiles(Array.from(event.dataTransfer.files))
       }}
     >
-      <div className="editor-heading">
-        <div>
-          <p className="eyebrow">{t('Zero-knowledge paste')}</p>
-          <h1 id="editor-title">{t('Write it. Encrypt it. Share the link.')}</h1>
-        </div>
-        <p className="muted editor-note">
+      <div className="mb-6 flex flex-col gap-2 sm:mb-7">
+        <h1 id="editor-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          {t('Write it. Encrypt it. Share the link.')}
+        </h1>
+        <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
           {t('Encryption happens in this browser. The key stays in the URL fragment and never reaches the server.')}
         </p>
       </div>
 
       {initial?.clone ? (
-        <div className="alert info" role="status">
+        <div
+          role="status"
+          className="mb-4 rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm text-foreground"
+        >
           {t('Cloning an existing document. Text, format and attachments are copied into this editor; password, expiry and burn settings are reset.')}
         </div>
       ) : null}
 
-      <div className="card editor-card">
-        <div className="tabs" role="tablist" aria-label="Editor mode">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'editor'}
-            className={tab === 'editor' ? 'tab active' : 'tab'}
-            onClick={() => setTab('editor')}
-          >
-            {t('Editor')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'preview'}
-            className={tab === 'preview' ? 'tab active' : 'tab'}
-            onClick={() => setTab('preview')}
-          >
-            {t('Preview')}
-          </button>
-          <span className="spacer" />
-          <span className="byte-count">
+      <Card className="overflow-hidden">
+        <div className="flex min-h-10 flex-wrap items-center gap-2 border-b bg-muted/40 px-3 py-2">
+          <div className="flex items-center gap-1 rounded-lg bg-background p-1 shadow-xs" role="tablist" aria-label="Editor mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'editor'}
+              className={`rounded-md px-3 py-1 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-ring ${tab === 'editor' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setTab('editor')}
+            >
+              {t('Editor')}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'preview'}
+              className={`rounded-md px-3 py-1 text-xs font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-ring ${tab === 'preview' ? 'bg-primary text-primary-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}`}
+              onClick={() => setTab('preview')}
+            >
+              {t('Preview')}
+            </button>
+          </div>
+          <span className="ml-auto font-mono text-xs text-muted-foreground">
             {formatBytes(bytes + attachmentBytes)} {t('text+files')}
-            <span className="muted"> · {t('ciphertext ≤')} {formatBytes(config.maxCiphertextBytes)}</span>
+            <span className="hidden sm:inline"> · {t('ciphertext ≤')} {formatBytes(config.maxCiphertextBytes)}</span>
           </span>
         </div>
 
         {tab === 'editor' ? (
-          <label className="editor-textarea">
-            <span className="sr-only">{t('Editor')}</span>
-            <textarea
+          <div className="px-3 pt-3 sm:px-4 sm:pt-4">
+            <Label htmlFor="paste-content" className="sr-only">
+              {t('Editor')}
+            </Label>
+            <Textarea
+              id="paste-content"
               ref={textareaRef}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -242,105 +253,117 @@ export function Editor({
               }}
               placeholder={t('Paste or type something worth keeping private…')}
               spellCheck={false}
-              rows={14}
+              className="min-h-[19rem] resize-y border-0 bg-transparent px-0 py-0 font-mono text-sm shadow-none focus-visible:ring-0"
             />
-          </label>
+          </div>
         ) : (
-          <div className="preview">
+          <CardContent className="min-h-[19rem] p-4">
             {text.length > 0 ? (
               <ContentRenderer text={text} format={format} />
             ) : attachments.length > 0 ? (
-              <p className="muted">{t('Attachments are included; add text if you want a preview.')}</p>
+              <CardDescription>{t('Attachments are included; add text if you want a preview.')}</CardDescription>
             ) : (
-              <p className="muted">{t('Nothing to preview yet.')}</p>
+              <CardDescription>{t('Nothing to preview yet.')}</CardDescription>
             )}
-          </div>
+          </CardContent>
         )}
 
-        <div className="editor-options">
-          <label className="field compact">
-            <span>{t('Expires')}</span>
-            <select value={expire} onChange={(event) => setExpire(event.target.value as ExpireKey)}>
+        <div className="grid gap-4 border-t bg-card p-4 sm:p-5 lg:grid-cols-[minmax(0,14rem)_minmax(0,14rem)_minmax(0,1fr)]">
+          <div className="space-y-2">
+            <Label htmlFor="paste-expiry">{t('Expires')}</Label>
+            <select
+              id="paste-expiry"
+              value={expire}
+              onChange={(event) => setExpire(event.target.value as ExpireKey)}
+              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+            >
               {config.expire.map((key) => (
                 <option key={key} value={key}>
                   {t(EXPIRY_LABELS[key] ?? key)}
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label className="field compact">
-            <span>{t('Format')}</span>
-            <select value={format} onChange={(event) => setFormat(event.target.value as Formatter)}>
+          <div className="space-y-2">
+            <Label htmlFor="paste-format">{t('Format')}</Label>
+            <select
+              id="paste-format"
+              value={format}
+              onChange={(event) => setFormat(event.target.value as Formatter)}
+              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring"
+            >
               {config.formatters.map((key) => (
                 <option key={key} value={key}>
                   {t(FORMAT_LABELS[key] ?? key)}
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label className="field compact password-field">
-            <span>{t('Password (optional)')}</span>
-            <span className="password-row">
-              <input
+          <div className="space-y-2">
+            <Label htmlFor="paste-password">{t('Password (optional)')}</Label>
+            <div className="flex gap-2">
+              <Input
+                id="paste-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder={t('No password')}
                 autoComplete="new-password"
               />
-              <button
+              <Button
                 type="button"
-                className="button ghost small"
+                variant="outline"
+                size="icon"
                 onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? t('Hide password') : t('Show password')}
               >
-                {showPassword ? t('Hide') : t('Show')}
-              </button>
-            </span>
-          </label>
+                {showPassword ? <EyeOff /> : <Eye />}
+              </Button>
+            </div>
+          </div>
 
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={burn}
-              onChange={(event) => {
-                setBurn(event.target.checked)
-                if (event.target.checked) {
-                  setDiscussion(false)
-                }
-              }}
-            />
-            <span>{t('Burn after reading')}</span>
-          </label>
-
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={discussion}
-              disabled={burn}
-              onChange={(event) => {
-                setDiscussion(event.target.checked)
-                if (event.target.checked) {
-                  setBurn(false)
-                }
-              }}
-            />
-            <span>{t('Open discussion')}</span>
-          </label>
+          <div className="flex flex-wrap items-center gap-5 lg:col-span-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={burn}
+                onChange={(event) => {
+                  setBurn(event.target.checked)
+                  if (event.target.checked) {
+                    setDiscussion(false)
+                  }
+                }}
+                className="size-4 accent-primary"
+              />
+              <span>{t('Burn after reading')}</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={discussion}
+                disabled={burn}
+                onChange={(event) => {
+                  setDiscussion(event.target.checked)
+                  if (event.target.checked) {
+                    setBurn(false)
+                  }
+                }}
+                className="size-4 accent-primary"
+              />
+              <span>{t('Open discussion')}</span>
+            </label>
+          </div>
         </div>
 
-        <div className="attachment-editor">
-          <div className="attachment-toolbar">
-            <button
-              type="button"
-              className="button ghost small"
-              onClick={() => fileInputRef.current?.click()}
-            >
+        <div className="border-t px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <FilePlus2 />
               {t('Attach files')}
-            </button>
-            <span className="muted small">
+            </Button>
+            <span className="text-xs text-muted-foreground">
               {t('Or drag and drop / paste files. Files are encrypted inside the document.')}
             </span>
             <input
@@ -354,72 +377,95 @@ export function Editor({
               }}
             />
           </div>
+
           {attachments.length > 0 ? (
-            <ul className="attachment-drafts">
+            <ul className="mt-3 grid gap-2">
               {attachments.map((attachment) => {
                 const kind = previewKind(attachment.mime)
                 return (
-                  <li key={attachment.id} className="attachment-draft">
+                  <li key={attachment.id} className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2">
                     {kind === 'image' ? (
-                      <img src={attachment.dataUrl} alt="" className="attachment-thumb" />
+                      <img src={attachment.dataUrl} alt="" className="size-8 rounded border object-cover" />
                     ) : (
-                      <span className="attachment-icon">{attachment.name.split('.').pop()?.slice(0, 4).toUpperCase() || 'FILE'}</span>
+                      <span className="grid size-8 place-items-center rounded border text-[0.55rem] font-mono text-muted-foreground">
+                        {attachment.name.split('.').pop()?.slice(0, 4).toUpperCase() || 'FILE'}
+                      </span>
                     )}
-                    <span className="attachment-draft-name">{attachment.name}</span>
-                    <span className="muted small">{formatFileSize(attachment.size)}</span>
-                    <button
+                    <span className="min-w-0 flex-1 truncate font-mono text-xs">{attachment.name}</span>
+                    <span className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</span>
+                    <Button
                       type="button"
-                      className="button ghost tiny"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`${t('Remove')} ${attachment.name}`}
                       onClick={() =>
                         setAttachments((current) => current.filter((item) => item.id !== attachment.id))
                       }
                     >
-                      {t('Remove')}
-                    </button>
+                      <Trash2 />
+                    </Button>
                   </li>
                 )
               })}
             </ul>
           ) : null}
+
           {attachments.length > 0 && attachmentBytes > 0 ? (
-            <p className="muted small">
+            <p className="mt-2 text-xs text-muted-foreground">
               {t('Attachments:')} {formatFileSize(attachmentBytes)} {t('before encryption.')}
             </p>
           ) : null}
         </div>
 
-        {password.length > 0 ? (
-          <p className="muted small">
-            {t('The password cannot be recovered. The recipient needs both the link and the password.')}
-          </p>
-        ) : null}
+        <CardContent className="space-y-3 border-t px-4 py-4 sm:px-5">
+          {password.length > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t('The password cannot be recovered. The recipient needs both the link and the password.')}
+            </p>
+          ) : null}
 
-        {burn ? (
-          <p className="alert warning small">
-            {t('A burn link is prefixed with')} <code>#-</code>
-            {t('. Opening it destroys the paste after one read. Send it only when the recipient is ready.')}
-          </p>
-        ) : null}
+          {burn ? (
+            <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
+              {t('A burn link is prefixed with')} <code>#-</code>
+              {t('. Opening it destroys the paste after one read. Send it only when the recipient is ready.')}
+            </div>
+          ) : null}
 
-        {config.turnstileSiteKey ? (
-          <TurnstileWidget key={turnstileKey} siteKey={config.turnstileSiteKey} onToken={setTurnstileToken} />
-        ) : null}
+          {config.turnstileSiteKey ? (
+            <TurnstileWidget key={turnstileKey} siteKey={config.turnstileSiteKey} onToken={setTurnstileToken} />
+          ) : null}
 
-        {fileError ? <div className="alert error" role="alert">{fileError}</div> : null}
-        {error ? <div className="alert error" role="alert">{error}</div> : null}
+          {fileError ? (
+            <div role="alert" className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              <X className="mt-0.5 size-4" />
+              <span>{fileError}</span>
+            </div>
+          ) : null}
 
-        <div className="editor-actions">
-          <button type="button" className="button primary" onClick={submit} disabled={!canSubmit}>
-            {busy ? t('Encrypting…') : t('Create paste')}
-          </button>
-          <span className="muted small">{t('⌘/Ctrl + S to submit')}</span>
+          {error ? (
+            <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Button size="lg" onClick={submit} disabled={!canSubmit}>
+              {busy ? <LoaderCircle className="animate-spin" /> : <Paperclip />}
+              {busy ? t('Encrypting…') : t('Create paste')}
+            </Button>
+            <span className="text-xs text-muted-foreground">{t('⌘/Ctrl + S to submit')}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {dragging ? (
+        <div className="drop-overlay">
+          <span>{t('Drop files to attach')}</span>
         </div>
-      </div>
+      ) : null}
 
-      {dragging ? <div className="drop-overlay">{t('Drop files to attach')}</div> : null}
-
-      <p className="muted small footer-note">
-        {t('Supports PrivateBin v2 pastes, comments and delete links. Not affiliated with the PrivateBin project.')}
+      <p className="mt-4 text-xs leading-5 text-muted-foreground">
+        {t('Supports PrivateBin v2 pastes, comments and delete links. A Cloudflare rewrite derived from PrivateBin.')}
       </p>
     </section>
   )
