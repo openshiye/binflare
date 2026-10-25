@@ -128,14 +128,23 @@ The committed `wrangler.jsonc` uses a placeholder D1 ID. Keep your account and d
 export CLOUDFLARE_ACCOUNT_ID=<account-id>
 export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
 
-pnpm setup:cloudflare       # create/reuse D1 + R2, record migrations, set lifecycle, write .env.deploy
+pnpm setup:cloudflare       # create/reuse D1 + R2, apply migrations, set lifecycle, write .env.deploy
 pnpm run deploy:dry-run     # validate the generated Worker config
-pnpm run deploy             # build, apply D1 migrations, inject .env.deploy and deploy
+pnpm run deploy             # build, deploy, and configure the R2 lifecycle when permitted
 ```
 
 `pnpm deploy` is reserved by pnpm itself, so use `pnpm run deploy` for this project.
 
-The Cloudflare deploy button uses the same `deploy` script, so the button flow provisions D1/R2, applies migrations and configures the R2 lifecycle rule. On the button setup page, keep the detected commands:
+The Worker initializes the D1 schema on its first API request. That makes the Cloudflare deploy button safe even when its build token can deploy Worker bindings but cannot query D1 directly.
+
+On the button setup page, keep the detected commands:
+
+```text
+Build command: npm run build
+Deploy command: npm run deploy
+```
+
+Do not replace the deploy command with the default `npx wrangler deploy`; that would use the committed placeholder D1 ID before the button has finished provisioning.
 
 ```text
 Build command: npm run build

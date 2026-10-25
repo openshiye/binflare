@@ -44,9 +44,10 @@ This is the operational closeout. The repository is public; `wrangler.jsonc` kee
    ```bash
    pnpm run deploy
    ```
-   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, applies D1 migrations through the generated config, deploys the Worker, and configures the R2 lifecycle rule when the deploy token has R2 access. The Cloudflare deploy button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
+   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, deploys the Worker, and configures the R2 lifecycle rule when the deploy token has R2 access. The Worker initializes the D1 schema on its first API request, so the Cloudflare deploy button does not need direct D1 query permission. The button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
 
 7. **Post-deploy smoke**
+   - The first `GET /api/health` request initializes the D1 schema.
    - `GET /api/health` returns `{ok:true}`.
    - Create/read/delete a small paste.
    - Create a burn paste; confirm it returns exactly one read.

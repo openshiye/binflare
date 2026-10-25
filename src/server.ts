@@ -1,6 +1,7 @@
 import handler from '@tanstack/react-start/server-entry'
 import { purge } from './server/purge'
 import { handleRootCreate, handleRootDelete, handleRootGet } from './server/root'
+import { ensureSchema } from './server/schema'
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -86,9 +87,11 @@ export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     if (url.pathname.startsWith('/api/')) {
+      await ensureSchema(env.DB)
       return handler.fetch(request)
     }
     if (isRootApiRequest(request, url)) {
+      await ensureSchema(env.DB)
       if (request.method === 'OPTIONS') {
         return new Response(null, {
           status: 204,
@@ -113,9 +116,11 @@ export default {
   },
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil(
-      purge(env).catch((error) => {
-        console.error('binflare purge failed', error)
-      }),
+      ensureSchema(env.DB)
+        .then(() => purge(env))
+        .catch((error) => {
+          console.error('binflare scheduled task failed', error)
+        }),
     )
   },
 } satisfies ExportedHandler<Env>

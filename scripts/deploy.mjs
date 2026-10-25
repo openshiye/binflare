@@ -128,7 +128,6 @@ if (!effectiveId || effectiveId === placeholderId) {
 if (dryRun) {
   runWrangler(['deploy', '--config', relative(root, configPath), '--dry-run'])
 } else {
-  runWrangler(['d1', 'migrations', 'apply', 'DB', '--remote', '--config', relative(root, configPath)])
   runWrangler(['deploy', '--config', relative(root, configPath)])
   await configureR2Lifecycle(config.r2_buckets?.[0]?.bucket_name)
 }

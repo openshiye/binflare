@@ -128,14 +128,16 @@ pnpm preview:worker
 export CLOUDFLARE_ACCOUNT_ID=<account-id>
 export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
 
-pnpm setup:cloudflare       # 创建或复用 D1/R2、登记 migrations、配置 lifecycle，并写 .env.deploy
+pnpm setup:cloudflare       # 创建或复用 D1/R2、应用迁移、配置 lifecycle，并写 .env.deploy
 pnpm run deploy:dry-run     # 校验生成的 Worker 配置
-pnpm run deploy             # 构建、应用 D1 migrations、注入 .env.deploy 并部署
+pnpm run deploy             # 构建、部署，并在令牌有权限时配置 R2 lifecycle
 ```
 
 `pnpm deploy` 是 pnpm 内置命令，所以本项目使用 `pnpm run deploy`。
 
-Cloudflare 一键部署按钮会复用同一个 `deploy` 脚本，因此按钮流会开通 D1/R2、执行迁移并配置 R2 lifecycle。在按钮配置页保留检测到的命令：
+Worker 会在首次 API 请求时自动初始化 D1 schema。即使 Cloudflare 按钮的构建令牌只能部署 Worker binding、不能直接查询 D1，一键部署也不会因缺表失败。
+
+在按钮配置页保留检测到的命令：
 
 ```text
 Build command: npm run build
