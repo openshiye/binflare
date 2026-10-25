@@ -5,6 +5,7 @@ import {
   FORMATTERS,
   MAX_CT_BASE64,
   MAX_CT_BYTES,
+  isExpireKey,
   type ExpireKey,
   type Formatter,
 } from '../lib/protocol'
@@ -15,6 +16,8 @@ export interface AppConfig {
   maxCtBytes: number
   maxCtBase64: number
   r2Enabled: boolean
+  expireOptions: ExpireKey[]
+  expireDefault: ExpireKey
   rateLimitWindowSeconds: number
   rateLimitMaxRequests: number
   turnstileSiteKey: string
@@ -48,6 +51,20 @@ function numberFromEnv(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
+function expireOptions(maxExpire: string | undefined): ExpireKey[] {
+  const all = Object.keys(EXPIRY_OPTIONS) as ExpireKey[]
+  if (!isExpireKey(maxExpire) || maxExpire === 'never') {
+    return all
+  }
+  const max = EXPIRY_OPTIONS[maxExpire]
+  return all.filter((key) => key !== 'never' && EXPIRY_OPTIONS[key] <= max)
+}
+
+function expireDefault(value: string | undefined, allowed: ExpireKey[]): ExpireKey {
+  const requested = isExpireKey(value) ? value : DEFAULT_EXPIRE
+  return allowed.includes(requested) ? requested : (allowed[0] ?? DEFAULT_EXPIRE)
+}
+
 export function getConfig(env: Env): AppConfig {
   const d1MaxCtBytes = numberFromEnv(env.MAX_PASTE_CT_BYTES, MAX_CT_BYTES)
   const d1MaxCtBase64 = numberFromEnv(env.MAX_PASTE_CT_BASE64, MAX_CT_BASE64)
@@ -56,12 +73,16 @@ export function getConfig(env: Env): AppConfig {
   const maxCtBase64 = r2Enabled
     ? numberFromEnv(env.MAX_R2_CT_BASE64, 13_400_000)
     : d1MaxCtBase64
+  const optionalEnv = env as Env & { MAX_EXPIRE?: string; EXPIRE_DEFAULT?: string }
+  const allowedExpireOptions = expireOptions(optionalEnv.MAX_EXPIRE)
   return {
     d1MaxCtBytes,
     d1MaxCtBase64,
     maxCtBytes,
     maxCtBase64,
     r2Enabled,
+    expireOptions: allowedExpireOptions,
+    expireDefault: expireDefault(optionalEnv.EXPIRE_DEFAULT, allowedExpireOptions),
     rateLimitWindowSeconds: numberFromEnv(env.RATE_LIMIT_WINDOW_SECONDS, 10),
     rateLimitMaxRequests: numberFromEnv(env.RATE_LIMIT_MAX_REQUESTS, 1),
     turnstileSiteKey: env.TURNSTILE_SITE_KEY ?? '',
@@ -74,8 +95,8 @@ export function getConfig(env: Env): AppConfig {
 export function getPublicConfig(env: Env): PublicConfig {
   const config = getConfig(env)
   return {
-    expire: Object.keys(EXPIRY_OPTIONS) as ExpireKey[],
-    expireDefault: DEFAULT_EXPIRE,
+    expire: config.expireOptions,
+    expireDefault: config.expireDefault,
     formatters: FORMATTERS,
     formatterDefault: DEFAULT_FORMATTER,
     maxCiphertextBytes: config.maxCtBytes,

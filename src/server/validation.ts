@@ -1,6 +1,5 @@
 import { base64ToBytes } from '../lib/binary'
 import {
-  DEFAULT_EXPIRE,
   FORMATTERS,
   isExpireKey,
   isFormatter,
@@ -143,7 +142,10 @@ export function validatePasteRequest(value: unknown, config: AppConfig): ValidPa
   if (!isRecord(value.meta) || !hasExactKeys(value.meta, ['expire'])) {
     throw new ValidationError('invalid', 'Invalid data.')
   }
-  const expire = isExpireKey(value.meta.expire) ? value.meta.expire : DEFAULT_EXPIRE
+  const expire = isExpireKey(value.meta.expire) ? value.meta.expire : config.expireDefault
+  if (!config.expireOptions.includes(expire)) {
+    throw new ValidationError('invalid', 'Invalid data.')
+  }
   const { ct, bytes } = validateCiphertext(value.ct, config)
   // The spec is validated but its exact values are preserved in adataJson.
   void spec
