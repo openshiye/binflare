@@ -1,0 +1,93 @@
+name: Bug report
+description: Report something that does not work as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you file: check the [known limitations](https://github.com/openshiye/binflare#honest-limitations)
+        and the [parity matrix](https://github.com/openshiye/binflare/blob/main/docs/PARITY.md).
+        Do not report vulnerabilities here — see [SECURITY.md](https://github.com/openshiye/binflare/blob/main/SECURITY.md).
+        中文描述完全可以，GitHub 不限语言。
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment method
+      description: This is the first thing we will ask, so please pick it now.
+      options:
+        - Cloudflare deploy button
+        - `pnpm run deploy` from this repository
+        - `pnpm preview:worker` / local development
+        - Fork or modified deployment
+        - The public preview (binflare.199595.xyz)
+      multiple: false
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Binflare version or commit
+      description: package.json version, or the commit you deployed. The preview instance may be ahead of the last tag.
+      placeholder: "0.1.0 / 3a02baf"
+    validations:
+      required: true
+  - type: dropdown
+    id: storage
+    attributes:
+      label: Storage tier of the instance
+      options:
+        - D1 only (no R2 binding)
+        - D1 + R2
+        - Not sure
+      multiple: false
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Which client produced this?
+      options:
+        - Binflare web UI
+        - Upstream PrivateBin web UI pointed at Binflare
+        - curl or another HTTP client against the API
+        - Other or unknown
+      multiple: false
+    validations:
+      required: true
+  - type: textarea
+    id: browser
+    attributes:
+      label: Browser and platform
+      placeholder: Firefox 141 on Linux, Safari 19 on iOS 26, …
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened
+      description: One or two sentences. Paste links are fine, but never include a real `#key` fragment or a delete token — redact them.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Browser console output, the HTTP status and response body of the failing request, or a Worker log line. Screenshots help for layout problems — mark up the region you mean.
+    validations:
+      required: false

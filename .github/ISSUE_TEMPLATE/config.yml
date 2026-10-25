@@ -1,0 +1,13 @@
+blank_issues_enabled: true
+blank_issues_title: Question or something else
+blank_issues_labels: ["question"]
+contact_links:
+  - name: Report a vulnerability (private)
+    url: https://github.com/openshiye/binflare/security/advisories/new
+    about: Never file security problems as a public issue. Open a private security advisory instead.
+  - name: Protocol contract
+    url: https://github.com/openshiye/binflare/blob/main/docs/PROTOCOL.md
+    about: The pinned PrivateBin 2.1.0 v2 wire format and JSON API this project implements.
+  - name: Deployment checklist
+    url: https://github.com/openshiye/binflare/blob/main/docs/DEPLOYMENT.md
+    about: Provisioning D1 and R2, migrations, the R2 lifecycle rule, Turnstile and the deploy button.

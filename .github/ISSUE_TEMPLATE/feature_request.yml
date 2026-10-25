@@ -1,0 +1,67 @@
+name: Feature request
+description: Propose something new, including parity gaps against upstream PrivateBin.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Protocol alignment is this project's red line, so the second question below is the one that
+        decides how a request gets scoped. 中文描述完全可以。
+  - type: textarea
+    id: scenario
+    attributes:
+      label: The scenario, in one sentence
+      description: Who is doing what, and what breaks or is missing today. Not the solution — the situation.
+      placeholder: "I host a paste for a team that only opens links on a phone, and …"
+    validations:
+      required: true
+  - type: dropdown
+    id: parity
+    attributes:
+      label: Does this affect PrivateBin protocol alignment?
+      description: Binflare must stay readable by an upstream PrivateBin 2.1.0 client pointed at the same base URL.
+      options:
+        - No — client or operator behaviour only
+        - Yes — it needs a protocol extension (extra fields, new adata meaning)
+        - Yes — it would deviate from or drop upstream behaviour
+        - Not sure
+      multiple: false
+    validations:
+      required: true
+  - type: textarea
+    id: upstream
+    attributes:
+      label: What does upstream PrivateBin do here?
+      description: If upstream already solves it, link the release, page or issue. We would rather match upstream than invent a third behaviour.
+      placeholder: "PrivateBin 2.1.0 does X because …"
+    validations:
+      required: false
+  - type: textarea
+    id: alternative
+    attributes:
+      label: What can you do today without it?
+      description: A workaround, another deployment setting, or "nothing — this is a hard blocker".
+    validations:
+      required: false
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Where does it belong?
+      options:
+        - Client UI
+        - Worker API or storage
+        - Deployment and operations
+        - Documentation
+        - Test or CI coverage
+      multiple: false
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Are you willing to send a pull request?
+      options:
+        - label: I can implement it and keep the change focused.
+          required: false
+        - label: I can test it against my own deployment.
+          required: false
