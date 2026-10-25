@@ -12,8 +12,8 @@ This is the operational closeout. The repository is private and the checked-in `
 ## Release checklist
 
 1. **CI green**
-   - `.github/workflows/ci.yml` must pass on `main`: typecheck, unit, Workers/D1, upstream 2.1.0 compatibility harness, production build, E2E.
-   - The compatibility harness checks out PrivateBin `2.1.0` into `.upstream/PrivateBin` and uses Docker `php:8.3-cli` for FNV/HMAC comparison. Do not replace this with a floating upstream checkout.
+   - `.github/workflows/ci.yml` must pass on `main`: typecheck, unit, Workers/D1, project-owned compatibility fixtures, production build, E2E.
+   - Compatibility is checked by `tests/compat/fixtures.json`, captured once from PrivateBin `2.1.0` and its PHP hash functions. CI does not checkout upstream or run Docker. When intentionally moving the baseline, regenerate/verify the fixtures as a separate change and update `docs/PROTOCOL.md` and `tests/compat/baseline.json`.
 
 2. **Create resources**
    ```bash

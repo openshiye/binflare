@@ -83,7 +83,7 @@ Browser (static SPA shell)
 - Client crypto: WebCrypto (PBKDF2-SHA256, AES-GCM/CTR/CBC) and native `CompressionStream`/`DecompressionStream` for raw DEFLATE.
 - Markdown: marked + DOMPurify; highlighting: highlight.js; QR: qrcode.
 
-Exact package versions are pinned in `package.json`; upgrades are separate changes verified by the compatibility harness.
+Exact package versions are pinned in `package.json`; upgrades are separate changes verified by the project-owned compatibility fixtures and E2E suite.
 
 ## Quick start
 

@@ -55,7 +55,7 @@ Binflare protects paste content from the storage layer and from an honest-but-cu
 
 - The frontend uses TanStack Start/Router, React, Vite, marked, DOMPurify, highlight.js and qrcode, pinned to exact versions. The lockfile is committed.
 - The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored. See `THIRD_PARTY_NOTICES.md`.
-- The compatibility harness runs against a pinned PrivateBin release tag and a pinned PHP container for hash/HMAC checks.
+- The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored. Compatibility fixtures are static test data captured from the pinned release tag and its PHP hash functions; CI does not load upstream code or Docker.
 
 ## Reporting
 

@@ -81,7 +81,7 @@ Binflare 实现 **PrivateBin 2.1.0 的 v2 线格式与 JSON API**：
 - 客户端加密：WebCrypto（PBKDF2-SHA256、AES-GCM/CTR/CBC），原生 `CompressionStream`/`DecompressionStream` 做 raw DEFLATE。
 - Markdown：marked + DOMPurify；高亮：highlight.js；二维码：qrcode。
 
-`package.json` 精确锁版本；升级单独提交，并用兼容 harness 验证。
+`package.json` 精确锁版本；升级单独提交，并用仓内兼容 fixtures 和 E2E 验证。
 
 ## 快速开始
 

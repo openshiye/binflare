@@ -1,6 +1,6 @@
 # Protocol contract
 
-Binflare targets the PrivateBin **v2** protocol. The baseline is the upstream release tag below; changes follow the same rule: pin a release, run the compatibility harness, then update this file.
+Binflare targets the PrivateBin **v2** protocol. The baseline is the upstream release tag below; changes follow the same rule: pin a release, refresh/verify the checked-in compatibility fixtures, then update this file.
 
 ```json
 {
@@ -122,7 +122,7 @@ These are server-side semantics, not part of the encryption format:
 - Delete token: `HMAC-SHA256(pasteId, salt)` as 64 lowercase hex characters. The salt is ASCII hex bytes; the HMAC key is the salt string.
 - Duplicate paste/comment ID: reject with the upstream collision message.
 
-The PHP reference uses `hash('fnv1a64', $ct)` and `hash_hmac('sha256', $id, $salt)`; the compatibility harness cross-checks both with a pinned PHP runtime.
+The PHP reference uses `hash('fnv1a64', $ct)` and `hash_hmac('sha256', $id, $salt)`; the checked-in compatibility fixtures contain the expected outputs captured from a pinned PHP runtime.
 
 ## URLs and HTTP
 
