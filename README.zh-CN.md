@@ -4,6 +4,10 @@
 
 # Binflare
 
+<p align="center">
+  <a href="README.md">English</a> · <strong>简体中文</strong>
+</p>
+
 [![CI](https://github.com/openshiye/binflare/actions/workflows/ci.yml/badge.svg)](https://github.com/openshiye/binflare/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Protocol: PrivateBin 2.1.0](https://img.shields.io/badge/protocol-PrivateBin%202.1.0-0f766e)](docs/PROTOCOL.md)
@@ -25,6 +29,22 @@
   <img src="docs/screenshots/editor-light.png" alt="Binflare 浅色编辑器" width="49%">
   <img src="docs/screenshots/editor-dark.png" alt="Binflare 深色编辑器" width="49%">
 </p>
+
+## 为什么是 Binflare
+
+PrivateBin 是一个 PHP 应用。跑起它意味着一台 Web 服务器、一个数据库、一套 TLS，还得有人把这三样一直补下去。Binflare 保留协议，把部署整体搬到 Cloudflare Workers：一次 `wrangler deploy`，没有服务器要维护，没有镜像要构建，免费额度就够个人或小团队用。
+
+代价写在明面上，不做隐藏：
+
+- 线格式仍与 PrivateBin 2.1.0 兼容，已有客户端把 base URL 指过来即可继续使用。
+- 数据不会搬迁。别的实例上创建的粘贴仍留在原处，Binflare 读不到。
+- 存储换成 D1 与 R2，不再是文件或 MySQL，大小上限与一致性语义随之改变，具体数字见[「限制」](#限制)。
+
+想要一个部署完就可以不再操心的边缘站点，选 Binflare。已经有 PHP 主机、需要别的存储后端、或需要本项目列为非目标的特性，选上游 PrivateBin（非目标见 [ROADMAP](docs/ROADMAP.md)）。
+
+## 当前状态
+
+版本 `0.1.0`。协议基线锁定 [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0)，并由 `tests/compat/baseline.json` 里的样本钉住，所以升级永远是一次独立而刻意的改动。在线体验实例运行的是当前 `main`。没有支持承诺，但 issue 里会直接回答。
 
 ## 协议兼容
 
@@ -190,11 +210,28 @@ pnpm run r2:lifecycle binflare-pastes
 - [上游对齐矩阵](docs/PARITY.md)
 - [架构](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
-- [安全](docs/SECURITY.md)
+- [安全模型与已知限制](docs/SECURITY.md)
+- [安全漏洞报告方式](SECURITY.md)
 - [部署与发布清单](docs/DEPLOYMENT.md)
 - [贡献指南](CONTRIBUTING.md)
-- [路线图](docs/ROADMAP.md)
-- [GitHub Issues](https://github.com/openshiye/binflare/issues)
+- [路线图方向与非目标](docs/ROADMAP.md)
+- [Issues](https://github.com/openshiye/binflare/issues)
+
+## 怎么协作
+
+公开的 issue 区就是 backlog。一个改动如果没有对应的 issue，就等于没有排期。
+
+- **Issue 承载具体工作。** [docs/ROADMAP.md](docs/ROADMAP.md) 只留方向与非目标，可执行的条目以 issue 形式公开，任何人都能看到下一步是什么、并直接领走。
+- **Milestone 就是版本。** `v0.2`、`v0.3` 各只挂真正要发的条目，发版说明直接从 milestone 生成。
+- **标签保持极少。** `bug`、`enhancement`、`parity`、`deploy`、`docs`，外加给外部贡献者留入口的 `good first issue`。`parity` 标出任何触及 PrivateBin 兼容性的改动，评审先看这个标签。
+- **每个 PR 必须 link issue**（`Closes #123`）。指不出公开记录的改动，先把 issue 开出来。
+- **安全问题不走公开区。** 用 [SECURITY.md](SECURITY.md) 里的私密 advisory 入口。
+- **暂不开 Discussions。** 提问先用 `question` 标签记在 issue 区，等重复答疑真的多了再说。
+
+第一次来？[提一个 bug](https://github.com/openshiye/binflare/issues/new?template=bug_report.yml)、
+[提一个需求](https://github.com/openshiye/binflare/issues/new?template=feature_request.yml)，
+或者从 [`good first issue`](https://github.com/openshiye/binflare/labels/good%20first%20issue) 开始。
+用中文提 issue 和 PR 都可以。
 
 ## 上游致谢
 

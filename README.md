@@ -4,6 +4,10 @@
 
 # Binflare
 
+<p align="center">
+  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
 [![CI](https://github.com/openshiye/binflare/actions/workflows/ci.yml/badge.svg)](https://github.com/openshiye/binflare/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Protocol: PrivateBin 2.1.0](https://img.shields.io/badge/protocol-PrivateBin%202.1.0-0f766e)](docs/PROTOCOL.md)
@@ -25,6 +29,33 @@ Pastes are encrypted in the browser before upload. The server stores ciphertext 
   <img src="docs/screenshots/editor-light.png" alt="Binflare editor in light mode" width="49%">
   <img src="docs/screenshots/editor-dark.png" alt="Binflare editor in dark mode" width="49%">
 </p>
+
+## Why Binflare
+
+PrivateBin is a PHP application. Running it means a web server, a database, TLS termination, and
+someone who keeps all three patched. Binflare keeps the protocol and moves the deployment onto
+Cloudflare Workers: one `wrangler deploy`, no server to maintain, no container image, and the free
+tier is enough for a personal or small-team instance.
+
+The trade-offs are stated rather than hidden:
+
+- The wire format stays PrivateBin 2.1.0 compatible, so an existing client can point its base URL at
+  a Binflare deployment.
+- Data does not move. Pastes created on another instance stay there; Binflare cannot read them.
+- Storage is D1 and R2 instead of files or MySQL, which changes the size ceiling and the consistency
+  story. Both are quantified under [honest limitations](#honest-limitations).
+
+Reach for Binflare when you want an edge-hosted instance you can stop thinking about. Reach for
+upstream PrivateBin when you already have PHP hosting, need another storage backend, or need a
+feature this project lists as a non-goal in [ROADMAP](docs/ROADMAP.md).
+
+## Status
+
+Version `0.1.0`. The protocol baseline is pinned to the
+[PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0) and locked
+down by fixtures in `tests/compat/baseline.json`, so an upgrade is always a deliberate, separate
+change. The public preview runs the current `main`. There is no support commitment; expect a
+direct answer in issues.
 
 ## Protocol compatibility
 
@@ -190,11 +221,35 @@ Full contracts and examples: [docs/API.md](docs/API.md).
 - [Upstream parity matrix](docs/PARITY.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [API](docs/API.md)
-- [Security](docs/SECURITY.md)
+- [Security model and limitations](docs/SECURITY.md)
+- [Security reporting policy](SECURITY.md)
 - [Deployment and release checklist](docs/DEPLOYMENT.md)
 - [Contributing](CONTRIBUTING.md)
-- [Roadmap](docs/ROADMAP.md)
-- [GitHub issues](https://github.com/openshiye/binflare/issues)
+- [Roadmap direction and non-goals](docs/ROADMAP.md)
+- [Issues](https://github.com/openshiye/binflare/issues)
+
+## How we work
+
+The public issue tracker is the backlog. If a change is not in an issue, it is not planned.
+
+- **Issues** carry the work. [docs/ROADMAP.md](docs/ROADMAP.md) keeps only direction and non-goals;
+  concrete items live as issues so anyone can see what is next and pick one up.
+- **Milestones** are releases (`v0.2`, `v0.3`, …). A milestone carries only what will actually ship,
+  and the release notes are generated from it.
+- **Labels** stay few: `bug`, `enhancement`, `parity`, `deploy`, `docs`, plus `good first issue` as
+  an entry point. `parity` marks anything that touches PrivateBin compatibility — that is the label
+  a review starts from.
+- **Every pull request links an issue** (`Closes #123`). A change that cannot point at a public
+  record gets the issue opened first.
+- **Security problems do not go through the public tracker.** Use the private advisory flow in
+  [SECURITY.md](SECURITY.md).
+- **No Discussions for now.** Questions are issues with the `question` label until the volume says
+  otherwise.
+
+New here? [Open a bug report](https://github.com/openshiye/binflare/issues/new?template=bug_report.yml),
+[request a feature](https://github.com/openshiye/binflare/issues/new?template=feature_request.yml),
+or start from [`good first issue`](https://github.com/openshiye/binflare/labels/good%20first%20issue).
+Chinese-language issues and pull requests are welcome.
 
 ## Upstream attribution
 

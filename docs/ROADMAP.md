@@ -1,5 +1,9 @@
 # Roadmap
 
+This file holds direction and non-goals. The executable backlog is public: concrete items live as
+[issues](https://github.com/openshiye/binflare/issues), grouped into release milestones. Anything
+listed below that becomes real work gets an issue, and the issue wins if the two disagree.
+
 ## Non-goals
 
 - Data import/migration from existing PrivateBin instances.
