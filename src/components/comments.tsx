@@ -70,9 +70,12 @@ function CommentForm({
   const [turnstileKey, setTurnstileKey] = useState(0)
   const { t } = useI18n()
 
+  const canSubmit =
+    text.trim().length > 0 && !busy && (!siteKey || turnstileToken.length > 0)
+
   async function submit(event: React.FormEvent) {
     event.preventDefault()
-    if (text.trim().length === 0 || busy) {
+    if (!canSubmit) {
       return
     }
     setBusy(true)
@@ -132,7 +135,7 @@ function CommentForm({
         </div>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" size="sm" disabled={busy || text.trim().length === 0}>
+        <Button type="submit" size="sm" disabled={!canSubmit}>
           {busy ? <LoaderCircle className="animate-spin" /> : <MessageSquarePlus />}
           {busy ? t('Posting…') : t('Post comment')}
         </Button>

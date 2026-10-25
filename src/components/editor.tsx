@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Eye, EyeOff, FilePlus2, LoaderCircle, Paperclip, Trash2, X } from 'lucide-react'
-import type { ClientConfig } from '../lib/api-client'
+import type { ApiErrorKind, ClientConfig } from '../lib/api-client'
 import type { ExpireKey, Formatter } from '../lib/protocol'
 import {
   attachmentSize,
@@ -12,6 +12,7 @@ import {
 import { ContentRenderer } from './content'
 import { TurnstileWidget } from './turnstile'
 import { useI18n } from '../lib/i18n'
+import { PROJECT } from '../lib/project'
 import { Button } from './ui/button'
 import { Card, CardContent, CardDescription } from './ui/card'
 import { Input } from './ui/input'
@@ -67,12 +68,14 @@ export function Editor({
   config,
   busy,
   error,
+  errorKind,
   initial,
   onCreate,
 }: {
   config: ClientConfig
   busy: boolean
   error?: string
+  errorKind?: ApiErrorKind | ''
   initial?: EditorInitial
   onCreate: (input: CreateInput) => Promise<void>
 }) {
@@ -111,7 +114,10 @@ export function Editor({
 
   const bytes = new TextEncoder().encode(text).length
   const attachmentBytes = attachments.reduce((sum, item) => sum + item.size, 0)
-  const canSubmit = (text.trim().length > 0 || attachments.length > 0) && !busy
+  const canSubmit =
+    (text.trim().length > 0 || attachments.length > 0) &&
+    !busy &&
+    (!config.turnstileSiteKey || turnstileToken.length > 0)
 
   async function addFiles(files: File[]): Promise<void> {
     if (files.length === 0) {
@@ -448,6 +454,15 @@ export function Editor({
             </div>
           ) : null}
 
+          {errorKind === 'rate_limit' || errorKind === 'too_large' ? (
+            <div className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm">
+              {t('Preview is shared and rate-limited. Deploy your own in one click — no limits.')}{' '}
+              <a href={PROJECT.repositoryUrl} target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">
+                {t('Deploy your own')}
+              </a>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <Button size="lg" onClick={submit} disabled={!canSubmit}>
               {busy ? <LoaderCircle className="animate-spin" /> : <Paperclip />}
@@ -466,7 +481,7 @@ export function Editor({
 
       {!config.largePastes ? (
         <div className="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm leading-6">
-          {t('Current deployment cap: about 1.8 MB, enough for short text and code snippets. Enable R2 to raise it to 10 MB for large text and attachments.')}{' '}
+          {t('Current paste limit is about 1.8 MB; enable R2 to raise it to 10 MB.')}{' '}
           <a href="/setup" className="font-medium underline underline-offset-4">
             {t('Deployment status')}
           </a>

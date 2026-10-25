@@ -6,6 +6,7 @@ import {
   createPaste,
   getClientConfig,
   readPaste,
+  type ApiErrorKind,
   type ClientConfig,
   type CommentRecord,
   type ReadResponse,
@@ -110,7 +111,10 @@ export function App() {
   const [created, setCreated] = useState<CreatedInfo | undefined>()
   const [pasteUrl, setPasteUrl] = useState('')
   const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState('')
+  const [createError, setCreateError] = useState<{
+    message: string
+    kind: ApiErrorKind | ''
+  }>()
   const [editorInitial, setEditorInitial] = useState<EditorInitial | undefined>()
   const [editorKey, setEditorKey] = useState(0)
   const [cloneChildren, setCloneChildren] = useState<string[]>([])
@@ -162,7 +166,7 @@ export function App() {
     setCreated(undefined)
     setPassword('')
     setPasswordError('')
-    setCreateError('')
+    setCreateError(undefined)
     if (!nextTarget) {
       if (readPublicPasteId(window.location.search)) {
         setError(t('This link is missing its decryption key (#fragment). Open the complete original link.'))
@@ -229,7 +233,7 @@ export function App() {
 
   async function handleCreate(input: CreateInput): Promise<void> {
     setCreating(true)
-    setCreateError('')
+    setCreateError(undefined)
     try {
       const encrypted = await createPasteCipher(input.text, {
         password: input.password,
@@ -292,7 +296,10 @@ export function App() {
       setScreen('view')
       window.scrollTo({ top: 0 })
     } catch (reason) {
-      setCreateError(messageFor(reason, t))
+      setCreateError({
+        message: messageFor(reason, t),
+        kind: reason instanceof ApiError ? reason.kind : '',
+      })
     } finally {
       setCreating(false)
     }
@@ -307,7 +314,7 @@ export function App() {
     setCreated(undefined)
     setPassword('')
     setPasswordError('')
-    setCreateError('')
+    setCreateError(undefined)
     setError('')
     setEditorInitial(undefined)
     setCloneChildren([])
@@ -339,7 +346,7 @@ export function App() {
     setCreated(undefined)
     setPassword('')
     setPasswordError('')
-    setCreateError('')
+    setCreateError(undefined)
     setError('')
     setScreen('create')
     window.scrollTo({ top: 0 })
@@ -387,7 +394,8 @@ export function App() {
             key={editorKey}
             config={config}
             busy={creating}
-            error={createError}
+            error={createError?.message}
+            errorKind={createError?.kind}
             initial={editorInitial}
             onCreate={handleCreate}
           />

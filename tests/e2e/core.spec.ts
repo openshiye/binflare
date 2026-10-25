@@ -372,31 +372,41 @@ test('REST create and comment aliases use the same D1 service', async ({ request
   expect(deleted.status()).toBe(204)
 })
 
+function configJson(overrides: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    expire: ['5min', '10min', '1hour', '1day', '1week', '1month', '1year', 'never'],
+    expireDefault: '1week',
+    formatters: ['plaintext', 'markdown', 'syntaxhighlighting'],
+    formatterDefault: 'plaintext',
+    maxCiphertextBytes: 10_000_000,
+    maxCiphertextBase64: 13_400_000,
+    d1CiphertextBytes: 1_875_000,
+    r2Enabled: true,
+    largePastes: true,
+    features: {
+      discussion: true,
+      password: true,
+      burn: true,
+      attachments: true,
+      qr: true,
+      email: true,
+    },
+    turnstileSiteKey: '',
+    ...overrides,
+  })
+}
+
 test('setup page and editor expose the D1-only tier when R2 is absent', async ({ page, context }) => {
   const errors = collectErrors(page)
   await context.route('**/api/config', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        expire: ['5min', '10min', '1hour', '1day', '1week', '1month', '1year', 'never'],
-        expireDefault: '1week',
-        formatters: ['plaintext', 'markdown', 'syntaxhighlighting'],
-        formatterDefault: 'plaintext',
+      body: configJson({
         maxCiphertextBytes: 1_875_000,
         maxCiphertextBase64: 2_500_000,
-        d1CiphertextBytes: 1_875_000,
         r2Enabled: false,
         largePastes: false,
-        features: {
-          discussion: true,
-          password: true,
-          burn: true,
-          attachments: true,
-          qr: true,
-          email: true,
-        },
-        turnstileSiteKey: '',
       }),
     }),
   )
@@ -409,7 +419,7 @@ test('setup page and editor expose the D1-only tier when R2 is absent', async ({
 
   await page.goto('/', { waitUntil: 'networkidle' })
   await expect(
-    page.getByText('Current deployment cap: about 1.8 MB, enough for short text and code snippets'),
+    page.getByText('Current paste limit is about 1.8 MB; enable R2 to raise it to 10 MB.'),
   ).toBeVisible()
   await expect(
     page.getByRole('region', { name: 'Write it. Encrypt it. Share the link.' }).getByRole('link', { name: 'Deployment status' }),
@@ -417,3 +427,53 @@ test('setup page and editor expose the D1-only tier when R2 is absent', async ({
   expect(errors).toEqual([])
 })
 
+
+test('create waits for a solved Turnstile challenge', async ({ page, context }) => {
+  await context.route('**/api/config', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: configJson({ turnstileSiteKey: '1x00000000000000000000AA' }),
+    }),
+  )
+
+  await page.goto('/', { waitUntil: 'networkidle' })
+  await page.locator('textarea').fill(unique('turnstile'))
+  const create = page.getByRole('button', { name: 'Create paste' })
+  await expect(create).toBeDisabled()
+
+  const token = page.locator('.turnstile input[name="cf-turnstile-response"]')
+  await expect(token).toHaveValue(/.+/, { timeout: 30_000 })
+  await expect(create).toBeEnabled()
+
+  await create.click()
+  await page.getByText('Document created.').waitFor()
+  await expect(page).toHaveURL(/#[1-9A-HJ-NP-Za-km-z]{32,}/)
+})
+
+test('a rate-limited create offers the deploy link in both languages', async ({ page }) => {
+  await page.route('**/', (route) => {
+    if (route.request().method() !== 'POST') {
+      return route.fallback()
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 1, message: 'Please wait 10 seconds between each post.' }),
+    })
+  })
+
+  await page.goto('/', { waitUntil: 'networkidle' })
+  await page.locator('textarea').fill(unique('rate limited'))
+  await page.getByRole('button', { name: 'Create paste' }).click()
+  await expect(page.getByText('Please wait 10 seconds between each post.')).toBeVisible()
+  await expect(
+    page.getByText('Preview is shared and rate-limited. Deploy your own in one click — no limits.'),
+  ).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Deploy your own' })).toHaveAttribute('href', /github\.com/)
+
+  await page.locator('.language-select').selectOption('zh')
+  await expect(
+    page.getByText('预览实例共享且限速。一键部署你自己的实例，不受这些限制。'),
+  ).toBeVisible()
+})
