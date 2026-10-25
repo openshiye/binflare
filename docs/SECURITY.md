@@ -54,9 +54,8 @@ Binflare protects paste content from the storage layer and from an honest-but-cu
 ## Supply chain
 
 - The frontend uses TanStack Start/Router, React, Vite, marked, DOMPurify, highlight.js and qrcode, pinned to exact versions. The lockfile is committed.
-- The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored. See `THIRD_PARTY_NOTICES.md`.
-- The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored. Compatibility fixtures are static test data captured from the pinned release tag and its PHP hash functions; CI does not load upstream code or Docker.
+- The protocol is reimplemented; no upstream PrivateBin source or bundled libraries are vendored, including the GPLv2-licensed rawinflate. Compatibility fixtures are static test data captured from the pinned release tag and its PHP hash functions; CI does not load upstream code or Docker. See `THIRD_PARTY_NOTICES.md`.
 
 ## Reporting
 
-Once the repository is public, report vulnerabilities through a private GitHub security advisory rather than a public issue. Include the affected version, a reproduction, and whether paste content or keys are exposed. Do not include real paste keys or user data in a report.
+Report vulnerabilities through a [private GitHub security advisory](../SECURITY.md), not a public issue. Include the affected version, how the instance is deployed, a reproduction, and whether paste content or keys are exposed. Do not include real paste keys or user data in a report.
