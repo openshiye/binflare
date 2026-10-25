@@ -20,6 +20,7 @@
     "cf-typegen": "wrangler types",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "db:migrate:generated": "wrangler d1 migrations apply DB --remote --config dist/server/wrangler.json",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run tests/unit",
     "test:workers": "vitest run --config vitest.workers.config.ts",

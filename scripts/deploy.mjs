@@ -58,19 +58,27 @@ if (!Array.isArray(config.d1_databases) || config.d1_databases.length === 0) {
   process.exit(1)
 }
 
-if (!databaseId) {
+const placeholderId = '00000000-0000-0000-0000-000000000000'
+const configuredId = config.d1_databases[0].database_id
+const effectiveId = databaseId ?? configuredId
+
+if (!effectiveId || effectiveId === placeholderId) {
   if (!dryRun) {
-    console.error('BINFLARE_D1_DATABASE_ID is required. Copy .env.deploy.example to .env.deploy and fill it in.')
+    console.error(
+      'No real D1 database_id was found. Locally, copy .env.deploy.example to .env.deploy. ' +
+        'With the Cloudflare deploy button, the button updates wrangler.jsonc before running this script.',
+    )
     process.exit(1)
   }
-  console.warn('BINFLARE_D1_DATABASE_ID is missing; using the placeholder database_id for dry-run validation.')
-} else {
+  console.warn('Using the placeholder database_id for dry-run validation.')
+} else if (databaseId && databaseId !== configuredId) {
   config.d1_databases[0].database_id = databaseId
   writeFileSync(configPath, `${JSON.stringify(config)}\n`)
 }
 
-const wranglerArgs = ['exec', 'wrangler', 'deploy', '--config', relative(root, configPath)]
 if (dryRun) {
-  wranglerArgs.push('--dry-run')
+  run('pnpm', ['exec', 'wrangler', 'deploy', '--config', relative(root, configPath), '--dry-run'])
+} else {
+  run('pnpm', ['exec', 'wrangler', 'd1', 'migrations', 'apply', 'DB', '--remote', '--config', relative(root, configPath)])
+  run('pnpm', ['exec', 'wrangler', 'deploy', '--config', relative(root, configPath)])
 }
-run('pnpm', wranglerArgs)

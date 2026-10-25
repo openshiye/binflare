@@ -126,12 +126,14 @@ The committed `wrangler.jsonc` uses a placeholder D1 ID. Keep your account and d
 export CLOUDFLARE_ACCOUNT_ID=<account-id>
 export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
 
-pnpm setup:cloudflare       # create/reuse D1 + R2, apply migrations, set lifecycle, write .env.deploy
+pnpm setup:cloudflare       # create/reuse D1 + R2, record migrations, set lifecycle, write .env.deploy
 pnpm run deploy:dry-run     # validate the generated Worker config
-pnpm run deploy             # build, inject .env.deploy and deploy
+pnpm run deploy             # build, apply D1 migrations, inject .env.deploy and deploy
 ```
 
 `pnpm deploy` is reserved by pnpm itself, so use `pnpm run deploy` for this project.
+
+The Cloudflare deploy button uses the same `deploy` script, so the button flow provisions D1/R2 and applies migrations without a second manual step.
 
 Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. The Cloudflare deploy button becomes usable once the repository is public. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist.
 
@@ -157,7 +159,7 @@ Full contracts and examples: [docs/API.md](docs/API.md).
 
 ## Upstream attribution
 
-Binflare is a Cloudflare-native rewrite derived from [PrivateBin](https://github.com/PrivateBin/PrivateBin). No upstream source code, assets, or bundled third-party libraries (including the GPLv2-licensed rawinflate) are used. The protocol baseline is the [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0). PrivateBin is © Sébastien Sauvage and the PrivateBin contributors and is licensed under Zlib/libpng.
+Binflare is a Cloudflare-native rewrite of the PrivateBin protocol. It is a derived, modified version of the upstream product and protocol; it does not copy upstream source code, assets, or bundled third-party libraries (including the GPLv2-licensed rawinflate). The protocol baseline is the [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0). PrivateBin is © Sébastien Sauvage and the PrivateBin contributors and is licensed under Zlib/libpng.
 
 **Binflare is a derived, modified version; it is not the original PrivateBin project.** See [NOTICE](NOTICE) for the full attribution and compatibility scope.
 

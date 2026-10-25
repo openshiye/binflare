@@ -55,28 +55,40 @@ async function ensureD1() {
 }
 
 async function ensureMigrations(databaseId) {
-  const status = await api(`/accounts/${account}/d1/database/${databaseId}/query`, {
+  await api(`/accounts/${account}/d1/database/${databaseId}/query`, {
     method: 'POST',
     body: JSON.stringify({
-      sql: "SELECT COUNT(*) AS n FROM sqlite_master WHERE type='table' AND name IN ('pastes','comments','rate_limits')",
+      sql: `CREATE TABLE IF NOT EXISTS "d1_migrations" (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )`,
     }),
   })
-  const tableCount = status?.[0]?.results?.[0]?.n ?? 0
-  if (tableCount >= 3) {
-    return 0
-  }
-  const files = ['migrations/0001_init.sql', 'migrations/0002_r2.sql']
-  let applied = 0
-  for (const file of files) {
-    for (const statement of splitSql(readFileSync(resolve(root, file), 'utf8'))) {
+  const appliedResult = await api(`/accounts/${account}/d1/database/${databaseId}/query`, {
+    method: 'POST',
+    body: JSON.stringify({ sql: 'SELECT name FROM d1_migrations ORDER BY name' }),
+  })
+  const applied = new Set((appliedResult?.[0]?.results ?? []).map((row) => row.name))
+  const files = ['0001_init.sql', '0002_r2.sql']
+  let executed = 0
+  for (const name of files) {
+    if (applied.has(name)) {
+      continue
+    }
+    for (const statement of splitSql(readFileSync(resolve(root, `migrations/${name}`), 'utf8'))) {
       await api(`/accounts/${account}/d1/database/${databaseId}/query`, {
         method: 'POST',
         body: JSON.stringify({ sql: statement }),
       })
-      applied += 1
+      executed += 1
     }
+    await api(`/accounts/${account}/d1/database/${databaseId}/query`, {
+      method: 'POST',
+      body: JSON.stringify({ sql: 'INSERT OR IGNORE INTO d1_migrations (name) VALUES (?1)', params: [name] }),
+    })
   }
-  return applied
+  return executed
 }
 
 async function ensureBucket() {

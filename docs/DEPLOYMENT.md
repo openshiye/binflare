@@ -21,7 +21,7 @@ This is the operational closeout. The repository is currently private; `wrangler
    export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
    pnpm setup:cloudflare
    ```
-   The setup script is idempotent: it finds or creates D1 `binflare`, creates R2 `binflare-pastes`, applies the checked-in migrations, configures the lifecycle rule and writes `.env.deploy`. Do not commit `.env.deploy`.
+   The setup script is idempotent: it finds or creates D1 `binflare`, creates R2 `binflare-pastes`, records the checked-in migrations in `d1_migrations`, configures the lifecycle rule and writes `.env.deploy`. Do not commit `.env.deploy`.
 
 3. **R2 lifecycle rule (release blocker)**
    - `pnpm setup:cloudflare` configures `expire-pastes-after-366-days` on `pastes/`.
@@ -44,7 +44,7 @@ This is the operational closeout. The repository is currently private; `wrangler
    ```bash
    pnpm run deploy
    ```
-   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` into `dist/server/wrangler.json`, and deploys the generated Worker. Use `pnpm run deploy`; `pnpm deploy` is a pnpm built-in command.
+   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, applies D1 migrations through the generated config, and deploys the Worker. The Cloudflare deploy button uses this same script after provisioning resources and updating `wrangler.jsonc`. Use `pnpm run deploy`; `pnpm deploy` is a pnpm built-in command.
 
 7. **Post-deploy smoke**
    - `GET /api/health` returns `{ok:true}`.

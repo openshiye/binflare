@@ -126,12 +126,14 @@ pnpm preview:worker
 export CLOUDFLARE_ACCOUNT_ID=<account-id>
 export CLOUDFLARE_API_TOKEN=<token-with-workers-d1-and-r2-write>
 
-pnpm setup:cloudflare       # 创建或复用 D1/R2、迁移 schema、配置 lifecycle，并写 .env.deploy
+pnpm setup:cloudflare       # 创建或复用 D1/R2、登记 migrations、配置 lifecycle，并写 .env.deploy
 pnpm run deploy:dry-run     # 校验生成的 Worker 配置
-pnpm run deploy             # 构建、注入 .env.deploy 并部署
+pnpm run deploy             # 构建、应用 D1 migrations、注入 .env.deploy 并部署
 ```
 
 `pnpm deploy` 是 pnpm 内置命令，所以本项目使用 `pnpm run deploy`。
+
+Cloudflare 一键部署按钮会复用同一个 `deploy` 脚本，因此按钮流会开通 D1/R2 并执行迁移，不需要部署后再手动补一次建表。
 
 需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。仓库公开后，Cloudflare 一键部署按钮才可用。完整清单见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 
@@ -157,7 +159,7 @@ pnpm run deploy             # 构建、注入 .env.deploy 并部署
 
 ## 上游致谢
 
-Binflare 是源自 [PrivateBin](https://github.com/PrivateBin/PrivateBin) 的 Cloudflare 重写版本。未复制上游源码、资产或捆绑第三方库（包括 GPLv2 的 rawinflate）。协议基线是 [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0)。PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。
+Binflare 是 PrivateBin 协议的 Cloudflare 重写版本。它是上游协议与产品形态的衍生改版，不复制上游源码、资产或捆绑第三方库（包括 GPLv2 的 rawinflate）。协议基线是 [PrivateBin 2.1.0 release](https://github.com/PrivateBin/PrivateBin/releases/tag/2.1.0)。PrivateBin 版权归 Sébastien Sauvage 及贡献者，使用 Zlib/libpng 许可证。
 
 **Binflare 是 PrivateBin 的衍生修改版本，不是原项目。** 完整致谢和兼容范围见 [NOTICE](NOTICE)。
 
