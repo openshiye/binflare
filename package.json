@@ -23,6 +23,7 @@
     "test:workers": "vitest run --config vitest.workers.config.ts",
     "test:compat": "vitest run --config vitest.compat.config.ts",
     "e2e:serve": "pnpm build && node scripts/start-e2e-server.mjs",
+    "bench:large": "node scripts/bench-large.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

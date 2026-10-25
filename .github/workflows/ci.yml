@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Binflare
+        uses: actions/checkout@v4
+
+      - name: Checkout PrivateBin baseline
+        uses: actions/checkout@v4
+        with:
+          repository: PrivateBin/PrivateBin
+          ref: 2.1.0
+          path: .upstream/PrivateBin
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Workers/D1 tests
+        run: pnpm test:workers
+
+      - name: Upstream compatibility harness
+        run: pnpm test:compat
+        env:
+          PRIVATEBIN_REPO: ${{ github.workspace }}/.upstream/PrivateBin
+
+      - name: Production build
+        run: pnpm build
+
+      - name: End-to-end tests
+        run: pnpm test:e2e
