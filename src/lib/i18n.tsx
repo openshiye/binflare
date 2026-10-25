@@ -154,13 +154,13 @@ const zh: Record<string, string> = {
   'D1 database': 'D1 数据库',
   'Ready. The schema is initialized on the first API request.':
     '已就绪。首次 API 请求会自动初始化数据表。',
-  'Large pastes and attachments': '大文本与附件',
+  'Large pastes': '大文本粘贴',
+  'Enabled. The current deployment accepts larger pastes up to the configured limit.':
+    '已启用。当前部署可接受达到配置上限的较大粘贴。',
+  'Not enabled. Short text and code snippets work; the current paste limit is about 1.8 MB.':
+    '未启用。短文本和代码片段可正常使用；单个粘贴上限约 1.8 MB。',
   Enabled: '已启用',
   'Not enabled': '未启用',
-  'Enabled. The current deployment accepts ciphertext up to the configured R2 limit.':
-    '已启用。当前部署可接受达到 R2 配置上限的密文。',
-  'Not enabled. Short text and code snippets work; the current deployment cap is about 1.8 MB.':
-    '未启用。短文本和代码片段可正常使用；当前部署上限约 1.8 MB。',
   'Enable R2 in the Cloudflare dashboard and create the bucket used by this deployment.':
     '请先在 Cloudflare 控制台开通 R2，并创建本次部署使用的对象桶。',
   'Redeploy the Worker once so Cloudflare attaches the R2 bucket.':
@@ -200,8 +200,11 @@ const zh: Record<string, string> = {
   'Wrong deletion token. Document was not deleted.': '删除令牌错误，文档未删除。',
   'Could not reach the server.': '无法连接服务端。',
   'The document is too large.': '文档太大。',
-  'Current deployment cap: about 1.8 MB, enough for short text and code snippets. Enable R2 to raise it to 10 MB for large text and attachments.':
-    '当前部署上限约 1.8 MB，适合短文本和代码片段；开通 R2 后可提升到 10 MB，支持大文本和附件。',
+  'Current paste limit is about 1.8 MB; enable R2 to raise it to 10 MB.':
+    '单个粘贴上限约 1.8 MB；开通 R2 后提升至 10 MB。',
+  'Preview is shared and rate-limited. Deploy your own in one click — no limits.':
+    '预览实例共享且限速。一键部署你自己的实例，不受这些限制。',
+  'Deploy your own': '部署你自己的实例',
   'The encrypted document is larger than this deployment allows.':
     '加密后的文档超过当前部署允许的大小。',
   'Please wait {seconds} seconds between each post.': '请等待 {seconds} 秒后再发送。',

@@ -127,12 +127,12 @@ function Setup() {
               state={config ? 'ready' : 'attention'}
             />
             <StatusRow
-              label={t('Large pastes and attachments')}
+              label={t('Large pastes')}
               detail={
                 config
                   ? largePastes
-                    ? t('Enabled. The current deployment accepts ciphertext up to the configured R2 limit.')
-                    : t('Not enabled. Short text and code snippets work; the current deployment cap is about 1.8 MB.')
+                    ? t('Enabled. The current deployment accepts larger pastes up to the configured limit.')
+                    : t('Not enabled. Short text and code snippets work; the current paste limit is about 1.8 MB.')
                   : t('Checking...')
               }
               status={largePastes ? t('Enabled') : t('Not enabled')}
