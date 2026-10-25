@@ -53,5 +53,8 @@ jobs:
       - name: Production build
         run: pnpm build
 
+      - name: Deploy configuration dry-run
+        run: pnpm deploy:dry-run --skip-build
+
       - name: End-to-end tests
         run: pnpm test:e2e

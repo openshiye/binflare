@@ -30,6 +30,7 @@ playwright/.cache/
 .env
 .env.*
 !.env.example
+!.env.deploy.example
 .dev.vars
 .dev.vars.*
 
