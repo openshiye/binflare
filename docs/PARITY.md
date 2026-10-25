@@ -1,6 +1,6 @@
 # Upstream parity
 
-Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare is an independent implementation; this matrix records what is preserved, adapted, deferred or deliberately rejected.
+Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare is a Cloudflare-native rewrite derived from it; this matrix records what is preserved, adapted, deferred or deliberately rejected.
 
 ## Matrix
 
@@ -52,5 +52,5 @@ Baseline: PrivateBin 2.1.0 (`2.1.0-83-ga88aa802` reference checkout). Binflare i
 ## License facts
 
 - Upstream PrivateBin is Zlib/libpng: commercial use, modification and redistribution are allowed with attribution and an explicit notice that modified versions are not the original.
-- Upstream bundles third-party components under GPLv2, BSD-3-Clause, MIT, Apache-2.0 and CC-BY-4.0. Binflare uses none of those bundled components or artwork; it reimplements the protocol with independent code and modern browser APIs.
-- Binflare does not claim to be PrivateBin or an official distribution. The non-affiliation statement is in [NOTICE](../NOTICE) and the README.
+- Upstream bundles third-party components under GPLv2, BSD-3-Clause, MIT, Apache-2.0 and CC-BY-4.0. Binflare uses none of those bundled components or artwork; it reimplements the protocol with its own code and modern browser APIs.
+- Binflare is a derived rewrite, not the original PrivateBin project. Attribution and derivation notes are in [NOTICE](../NOTICE) and the README.

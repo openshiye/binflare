@@ -24,6 +24,6 @@ The versions are pinned in `package.json`; license texts are included in the ins
 
 ## Upstream protocol reference
 
-PrivateBin is © Sébastien Sauvage and the PrivateBin contributors, licensed under Zlib/libpng. Binflare reimplements the v2 protocol and does not vendor upstream code or artwork. See [NOTICE](NOTICE) for attribution and non-affiliation.
+PrivateBin is © Sébastien Sauvage and the PrivateBin contributors, licensed under Zlib/libpng. Binflare reimplements the v2 protocol and does not vendor upstream code or artwork. See [NOTICE](NOTICE) for attribution and derivation.
 
 No GPLv2, CC-BY, or other upstream bundled components are included in Binflare.

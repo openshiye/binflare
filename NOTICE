@@ -1,8 +1,9 @@
 NOTICE
 
-Binflare is an independent reimplementation of the PrivateBin protocol,
-written for Cloudflare Workers. No source code or assets from the
-upstream project have been copied.
+Binflare is a Cloudflare-native rewrite derived from the PrivateBin protocol,
+written for Cloudflare Workers. It is a modified version, not the original
+PrivateBin project. No source code or assets from the upstream project have
+been copied.
 
 Upstream attribution
 --------------------
@@ -18,7 +19,7 @@ Protocol baseline and behavioral reference: PrivateBin 2.1.0
 
 PrivateBin is a minimalist, open source online pastebin where the
 server has zero knowledge of pasted data. Binflare implements the v2
-wire format and JSON API independently, using modern browser APIs. It
+wire format and JSON API for Cloudflare, using modern browser APIs. It
 does not use upstream's bundled third-party libraries (including the
 GPLv2-licensed rawinflate) or upstream's CC-BY-licensed artwork.
 
@@ -30,9 +31,10 @@ ZeroBin, and it does not import or migrate data from an existing
 instance. Protocol compatibility is not a claim of data migration or
 drop-in replacement for an existing database.
 
-Non-affiliation
----------------
-Binflare is NOT affiliated with, endorsed by, or an official port or
-distribution of the PrivateBin project. The "PrivateBin" name and
-project belong to their respective owners. Binflare uses its own name,
-logo and visual identity.
+Relationship
+------------
+Binflare is a community rewrite derived from PrivateBin and is not the
+original PrivateBin project. We thank the PrivateBin authors and
+contributors for the protocol and the upstream implementation. The
+"PrivateBin" name and project belong to their respective owners.
+Binflare uses its own name, logo and visual identity.
