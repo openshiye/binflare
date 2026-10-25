@@ -464,6 +464,15 @@ export function Editor({
         </div>
       ) : null}
 
+      {!config.largePastes ? (
+        <div className="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm leading-6">
+          {t('Current deployment cap: about 1.8 MB, enough for short text and code snippets. Enable R2 to raise it to 10 MB for large text and attachments.')}{' '}
+          <a href="/setup" className="font-medium underline underline-offset-4">
+            {t('Deployment status')}
+          </a>
+        </div>
+      ) : null}
+
       <p className="mt-4 text-xs leading-5 text-muted-foreground">
         {t('Supports PrivateBin v2 pastes, comments and delete links. A Cloudflare rewrite derived from PrivateBin.')}
       </p>

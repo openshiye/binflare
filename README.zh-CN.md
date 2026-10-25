@@ -146,6 +146,8 @@ Deploy command: npm run deploy
 
 不要把部署命令改回默认的 `npx wrangler deploy`；那会在按钮完成资源开通前使用仓库里的占位 D1 ID。
 
+全新的 Cloudflare 账号可能需要先开通 R2（免费额度内不扣费，但 Cloudflare 要求绑定支付方式），再重新部署一次。应用会识别缺少 R2 绑定，并以 D1 档先正常运行； `/setup` 页会告诉你下一步怎么做。
+
 ### 部署后：配置 R2 lifecycle
 
 按钮会自动开通 R2，但 Cloudflare 的构建令牌不一定有权限修改桶的生命周期规则。部署完成后请手动配置一次。

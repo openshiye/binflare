@@ -146,6 +146,8 @@ Deploy command: npm run deploy
 
 Do not replace the deploy command with the default `npx wrangler deploy`; that would use the committed placeholder D1 ID before the button has finished provisioning.
 
+Fresh Cloudflare accounts may need to enable R2 (a payment method is required, even within the free allowance) and redeploy once. The app detects the missing R2 binding, starts in the D1-only tier, and tells you what to do at `/setup`.
+
 ### After deploying: configure R2 lifecycle
 
 The button provisions R2, but Cloudflare's build token may not be allowed to change bucket lifecycle settings. Configure this once after deployment.

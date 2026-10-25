@@ -150,6 +150,7 @@ Error body:
   "maxCiphertextBase64": 13400000,
   "d1CiphertextBytes": 1875000,
   "r2Enabled": true,
+  "largePastes": true,
   "features": {
     "discussion": true,
     "password": true,
@@ -162,7 +163,7 @@ Error body:
 }
 ```
 
-`maxCiphertextBytes` is the effective cap. With an R2 binding, ciphertext up to 10 MB is accepted; without R2, the D1 cap (1.875 MB) applies. The API still returns a single base64 `ct`; R2 storage is transparent to clients.
+`maxCiphertextBytes` is the effective cap. `largePastes` is the product-facing capability tier: when true, ciphertext up to 10 MB is accepted; when false, the D1 cap (1.875 MB) applies. The API still returns a single base64 `ct`; R2 storage is transparent to clients.
 
 ## Headers
 

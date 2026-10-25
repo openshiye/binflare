@@ -42,14 +42,36 @@ function run(command, commandArgs) {
   }
 }
 
-function runWrangler(wranglerArgs) {
+function commandForWrangler(wranglerArgs) {
   if (packageManager === 'pnpm') {
-    run('pnpm', ['exec', 'wrangler', ...wranglerArgs])
-  } else if (packageManager === 'yarn') {
-    run('yarn', ['exec', 'wrangler', ...wranglerArgs])
-  } else {
-    run('npx', ['--no-install', 'wrangler', ...wranglerArgs])
+    return ['pnpm', ['exec', 'wrangler', ...wranglerArgs]]
   }
+  if (packageManager === 'yarn') {
+    return ['yarn', ['exec', 'wrangler', ...wranglerArgs]]
+  }
+  return ['npx', ['--no-install', 'wrangler', ...wranglerArgs]]
+}
+
+function runWrangler(wranglerArgs) {
+  const [command, commandArgs] = commandForWrangler(wranglerArgs)
+  run(command, commandArgs)
+}
+
+function runWranglerCaptured(wranglerArgs) {
+  const [command, commandArgs] = commandForWrangler(wranglerArgs)
+  const result = spawnSync(command, commandArgs, {
+    cwd: root,
+    encoding: 'utf8',
+    env: process.env,
+  })
+  return {
+    status: result.status ?? 1,
+    output: `${result.stdout ?? ''}${result.stderr ?? ''}`,
+  }
+}
+
+function isR2Unavailable(output) {
+  return /R2 bucket .*not found|code: 10085|NotEntitled|code: 10042|R2 subscription|enable R2/i.test(output)
 }
 
 async function configureR2Lifecycle(bucketName) {
@@ -128,9 +150,30 @@ if (!effectiveId || effectiveId === placeholderId) {
   writeFileSync(configPath, `${JSON.stringify(config)}\n`)
 }
 
+const deployArgs = ['deploy', '--config', relative(root, configPath)]
 if (dryRun) {
-  runWrangler(['deploy', '--config', relative(root, configPath), '--dry-run'])
+  deployArgs.push('--dry-run')
+}
+
+const r2Buckets = Array.isArray(config.r2_buckets) ? config.r2_buckets : []
+if (dryRun) {
+  runWrangler(deployArgs)
 } else {
-  runWrangler(['deploy', '--config', relative(root, configPath)])
-  await configureR2Lifecycle(config.r2_buckets?.[0]?.bucket_name)
+  const first = runWranglerCaptured(deployArgs)
+  if (first.status !== 0 && r2Buckets.length > 0 && isR2Unavailable(first.output)) {
+    console.warn('R2 is unavailable for this deployment. Falling back to the D1-only capability tier.')
+    config.r2_buckets = []
+    writeFileSync(configPath, `${JSON.stringify(config)}\n`)
+    const fallback = runWranglerCaptured(deployArgs)
+    process.stdout.write(fallback.output)
+    if (fallback.status !== 0) {
+      process.exit(fallback.status)
+    }
+  } else {
+    process.stdout.write(first.output)
+    if (first.status !== 0) {
+      process.exit(first.status)
+    }
+  }
+  await configureR2Lifecycle(r2Buckets[0]?.bucket_name)
 }

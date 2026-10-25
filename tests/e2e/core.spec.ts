@@ -372,3 +372,48 @@ test('REST create and comment aliases use the same D1 service', async ({ request
   expect(deleted.status()).toBe(204)
 })
 
+test('setup page and editor expose the D1-only tier when R2 is absent', async ({ page, context }) => {
+  const errors = collectErrors(page)
+  await context.route('**/api/config', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        expire: ['5min', '10min', '1hour', '1day', '1week', '1month', '1year', 'never'],
+        expireDefault: '1week',
+        formatters: ['plaintext', 'markdown', 'syntaxhighlighting'],
+        formatterDefault: 'plaintext',
+        maxCiphertextBytes: 1_875_000,
+        maxCiphertextBase64: 2_500_000,
+        d1CiphertextBytes: 1_875_000,
+        r2Enabled: false,
+        largePastes: false,
+        features: {
+          discussion: true,
+          password: true,
+          burn: true,
+          attachments: true,
+          qr: true,
+          email: true,
+        },
+        turnstileSiteKey: '',
+      }),
+    }),
+  )
+
+  await page.goto('/setup', { waitUntil: 'networkidle' })
+  await expect(page.getByRole('heading', { name: 'Deployment status' })).toBeVisible()
+  await expect(page.getByText('Short text and code snippets work')).toBeVisible()
+  await expect(page.getByText('Redeploy the Worker once')).toBeVisible()
+  await expect(page.getByText('The Worker cannot verify this rule')).toBeVisible()
+
+  await page.goto('/', { waitUntil: 'networkidle' })
+  await expect(
+    page.getByText('Current deployment cap: about 1.8 MB, enough for short text and code snippets'),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Write it. Encrypt it. Share the link.' }).getByRole('link', { name: 'Deployment status' }),
+  ).toBeVisible()
+  expect(errors).toEqual([])
+})
+

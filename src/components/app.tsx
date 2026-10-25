@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   ApiError,
   FALLBACK_CONFIG,
+  base64DecodedBytes,
   createPaste,
   getClientConfig,
   readPaste,
@@ -79,7 +80,7 @@ function messageFor(error: unknown, t: (key: string, vars?: Record<string, strin
       return t('Could not reach the server.')
     }
     if (error.kind === 'too_large') {
-      return t('The document is too large.')
+      return error.message || t('The document is too large.')
     }
     if (error.kind === 'rate_limit') {
       const seconds = error.message.match(/(\d+)/)?.[1] ?? ''
@@ -242,6 +243,9 @@ export function App() {
         })),
         children: cloneChildren,
       })
+      if (base64DecodedBytes(encrypted.request.ct) > config.maxCiphertextBytes) {
+        throw new ApiError(t('The encrypted document is larger than this deployment allows.'), 'too_large')
+      }
       const result = await createPaste(encrypted.request, input.turnstileToken || undefined)
       const nextTarget: PasteTarget = {
         id: result.id,

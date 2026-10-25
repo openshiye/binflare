@@ -31,6 +31,7 @@ export interface PublicConfig {
   maxCiphertextBase64: number
   d1CiphertextBytes: number
   r2Enabled: boolean
+  largePastes: boolean
   features: {
     discussion: boolean
     password: boolean
@@ -81,6 +82,7 @@ export function getPublicConfig(env: Env): PublicConfig {
     maxCiphertextBase64: config.maxCtBase64,
     d1CiphertextBytes: config.d1MaxCtBytes,
     r2Enabled: config.r2Enabled,
+    largePastes: config.r2Enabled,
     features: {
       discussion: true,
       password: true,

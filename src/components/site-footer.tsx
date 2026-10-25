@@ -4,6 +4,7 @@ import { useI18n } from '../lib/i18n'
 export function SiteFooter() {
   const { t } = useI18n()
   const links = [
+    { label: t('Deployment status'), href: '/setup' },
     { label: t('Protocol compatibility'), href: PROJECT.protocolDocsUrl },
     { label: t('Upstream PrivateBin'), href: PROJECT.upstreamUrl },
     { label: t('Source'), href: PROJECT.repositoryUrl },

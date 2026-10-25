@@ -30,6 +30,9 @@ export interface ClientConfig {
   formatterDefault: Formatter
   maxCiphertextBytes: number
   maxCiphertextBase64: number
+  d1CiphertextBytes: number
+  r2Enabled: boolean
+  largePastes: boolean
   features: {
     discussion: boolean
     password: boolean
@@ -48,6 +51,9 @@ export const FALLBACK_CONFIG: ClientConfig = {
   formatterDefault: DEFAULT_FORMATTER,
   maxCiphertextBytes: MAX_CT_BYTES,
   maxCiphertextBase64: MAX_CT_BASE64,
+  d1CiphertextBytes: MAX_CT_BYTES,
+  r2Enabled: false,
+  largePastes: false,
   features: {
     discussion: true,
     password: true,
@@ -134,6 +140,11 @@ async function compatJson(response: Response): Promise<Record<string, unknown>> 
     throw new ApiError('The server returned an invalid response.', 'server')
   }
   return data
+}
+
+export function base64DecodedBytes(value: string): number {
+  const padding = value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0
+  return Math.max(0, Math.floor((value.length * 3) / 4) - padding)
 }
 
 export async function createPaste(

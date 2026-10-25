@@ -49,7 +49,7 @@ This is the operational closeout. The repository is public; `wrangler.jsonc` kee
    ```bash
    pnpm run deploy
    ```
-   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, deploys the Worker, and attempts the R2 lifecycle rule. If the token lacks R2 access, follow step 3. The Worker initializes the D1 schema on its first API request, so the Cloudflare deploy button does not need direct D1 query permission. The button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
+   The script builds, injects `BINFLARE_D1_DATABASE_ID` from `.env.deploy` when present, deploys the Worker, and attempts the R2 lifecycle rule. If R2 is not entitled or provisioned, the deploy command retries without the R2 binding so the Worker still starts in the D1-only tier. The Worker initializes the D1 schema on its first API request, so the Cloudflare deploy button does not need direct D1 query permission. The button uses this same script after provisioning resources and updating `wrangler.jsonc`; keep its detected commands as `npm run build` and `npm run deploy`. Use `pnpm run deploy` or `npm run deploy`; bare `pnpm deploy` is a pnpm built-in command.
 
 7. **Post-deploy smoke**
    - The first `GET /api/health` request initializes the D1 schema.
