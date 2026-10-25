@@ -1,0 +1,99 @@
+{
+  "source": {
+    "project": "PrivateBin",
+    "releaseTag": "2.1.0",
+    "generatedAt": "2026-10-25T04:41:09.849Z",
+    "note": "Static fixture data captured from the pinned upstream tag and PHP hash functions; CI does not load upstream code or Docker."
+  },
+  "pastes": [
+    {
+      "keyBase58": "EKEdPq8QNUEgFVW8w2krXUxKxDBW3gB43PqpSu6HGe84",
+      "ct": "4Yv46f3R+hbQb+VzmhhC5K+gw1QUAVujg9OYn2HhYaC+VH35U+21AuBZmw==",
+      "adata": [
+        [
+          "Ox2KeeXLbBy9vTq8K30cJw==",
+          "rigXKLfzHs0=",
+          100000,
+          256,
+          128,
+          "aes",
+          "gcm",
+          "zlib"
+        ],
+        "plaintext",
+        0,
+        0
+      ],
+      "password": "",
+      "text": "upstream text"
+    },
+    {
+      "keyBase58": "EbaDqPU1Quea9t9qUUWZ56Knxx4bHJRLy9djkJaEPRde",
+      "ct": "8bP3ZuWp2G0KAgZzjOHU/u9KPPauv4eZPTsMZrgKMDaalkQkWIb+Q0+xO3R2",
+      "adata": [
+        [
+          "IA/ZddMGp8GTRIEQ5kEEmg==",
+          "NDllIHWJqB4=",
+          100000,
+          256,
+          128,
+          "aes",
+          "gcm",
+          "zlib"
+        ],
+        "plaintext",
+        0,
+        0
+      ],
+      "password": "口令é",
+      "text": "秘密 upstream"
+    },
+    {
+      "keyBase58": "2ogTT2h2gHzUDd6cf8HLGreSeTuEYb3DzNvxdTnW9kJa",
+      "ct": "WAJssc2Ita6wER+43xPBcCorC0K866oHEKPmjLogBYOdnukFr6gajQgQuOP9+uD8fA==",
+      "adata": [
+        [
+          "fbIKQ1iv9wfWuLWkZSgMgg==",
+          "4Dp3a1zlHoI=",
+          100000,
+          256,
+          128,
+          "aes",
+          "gcm",
+          "none"
+        ],
+        "plaintext",
+        0,
+        0
+      ],
+      "password": "",
+      "text": "uncompressed upstream"
+    }
+  ],
+  "comment": {
+    "keyBase58": "Aswp7Lu8Sd6TfTHnVuRLm8ZbDNmV97L4AN99AR6LA4cf",
+    "ct": "qjIHH587Hn2jmfSqmXXRY3XbEiAPq08sQKCBz3FL4+9VvsyrDBKjcWABpz/k2dH+OtKVGc+GSZH72uRYq4n0Dzs=",
+    "adata": [
+      "/YzyxxvuHTFiz+mLEFHHiA==",
+      "kHGyTTbYSkU=",
+      100000,
+      256,
+      128,
+      "aes",
+      "gcm",
+      "none"
+    ],
+    "password": "",
+    "text": "upstream comment",
+    "nickname": "Alice"
+  },
+  "fnv": {
+    "ct": "SGVsbG8gUHJpdmF0ZUJpbg==",
+    "expectedId": "64e3a7dd3a78b0de"
+  },
+  "hmac": {
+    "pasteId": "0123456789abcdef",
+    "salt": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+    "expectedToken": "fffef7f620beeb8eb213ef790cb3dd5386184d92cf7d662faa6e6928e430e1a5"
+  }
+}

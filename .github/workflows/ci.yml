@@ -21,14 +21,6 @@ jobs:
       - name: Checkout Binflare
         uses: actions/checkout@v4
 
-      - name: Checkout PrivateBin baseline
-        uses: actions/checkout@v4
-        with:
-          repository: PrivateBin/PrivateBin
-          ref: 2.1.0
-          path: .upstream/PrivateBin
-          fetch-depth: 0
-
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -55,10 +47,8 @@ jobs:
       - name: Workers/D1 tests
         run: pnpm test:workers
 
-      - name: Upstream compatibility harness
+      - name: Upstream compatibility fixtures
         run: pnpm test:compat
-        env:
-          PRIVATEBIN_REPO: ${{ github.workspace }}/.upstream/PrivateBin
 
       - name: Production build
         run: pnpm build
