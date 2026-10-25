@@ -1,15 +1,59 @@
-node_modules
-.DS_Store
-.cache
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.output/
+.nitro/
+.vinxi/
+.tanstack/
+.wrangler/
+.vercel/
+.netlify/
+.turbo/
+
+# Generated Cloudflare types (run `pnpm cf-typegen`)
+worker-configuration.d.ts
+
+# Test and coverage output
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.vitest/
+
+# Environment and secrets
 .env
 .env.*
 !.env.example
-dist
-.wrangler
-worker-configuration.d.ts
-playwright-report
-test-results
-coverage
-
 .dev.vars
+.dev.vars.*
 
+# Local databases, caches and temp files
+.cache/
+tmp/
+.temp/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# OS and editor artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+.zed/
+.qoder/
+*.swp
+*.swo
+
+# Local upstream checkout used only by manual compatibility regeneration
+.upstream/
