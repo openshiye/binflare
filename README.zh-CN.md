@@ -135,7 +135,14 @@ pnpm run deploy             # 构建、应用 D1 migrations、注入 .env.deploy
 
 `pnpm deploy` 是 pnpm 内置命令，所以本项目使用 `pnpm run deploy`。
 
-Cloudflare 一键部署按钮会复用同一个 `deploy` 脚本，因此按钮流会开通 D1/R2 并执行迁移，不需要部署后再手动补一次建表。
+Cloudflare 一键部署按钮会复用同一个 `deploy` 脚本，因此按钮流会开通 D1/R2、执行迁移并配置 R2 lifecycle。在按钮配置页保留检测到的命令：
+
+```text
+Build command: npm run build
+Deploy command: npm run deploy
+```
+
+不要把部署命令改回默认的 `npx wrangler deploy`；那会在按钮完成资源开通前使用仓库里的占位 D1 ID。
 
 需要 Turnstile 时配置 `TURNSTILE_SITE_KEY`（var）和 `TURNSTILE_SECRET`（secret），否则留空。仓库公开后，Cloudflare 一键部署按钮才可用。完整清单见 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)。
 

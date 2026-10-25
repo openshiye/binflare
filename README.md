@@ -135,7 +135,14 @@ pnpm run deploy             # build, apply D1 migrations, inject .env.deploy and
 
 `pnpm deploy` is reserved by pnpm itself, so use `pnpm run deploy` for this project.
 
-The Cloudflare deploy button uses the same `deploy` script, so the button flow provisions D1/R2 and applies migrations without a second manual step.
+The Cloudflare deploy button uses the same `deploy` script, so the button flow provisions D1/R2, applies migrations and configures the R2 lifecycle rule. On the button setup page, keep the detected commands:
+
+```text
+Build command: npm run build
+Deploy command: npm run deploy
+```
+
+Do not replace the deploy command with the default `npx wrangler deploy`; that would use the committed placeholder D1 ID before the button has finished provisioning.
 
 Configure `TURNSTILE_SITE_KEY` (var) and `TURNSTILE_SECRET` (secret) if you want Turnstile; otherwise leave them empty. The Cloudflare deploy button becomes usable once the repository is public. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full checklist.
 
