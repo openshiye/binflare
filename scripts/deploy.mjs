@@ -132,6 +132,32 @@ if (!Array.isArray(config.d1_databases) || config.d1_databases.length === 0) {
   process.exit(1)
 }
 
+const deploymentEnv = { ...localEnv, ...process.env }
+const previewVarKeys = [
+  'MAX_PASTE_CT_BYTES',
+  'MAX_PASTE_CT_BASE64',
+  'MAX_R2_CT_BYTES',
+  'MAX_R2_CT_BASE64',
+  'RATE_LIMIT_WINDOW_SECONDS',
+  'RATE_LIMIT_MAX_REQUESTS',
+  'TURNSTILE_SITE_KEY',
+  'CORS_ORIGIN',
+  'MAX_EXPIRE',
+  'EXPIRE_DEFAULT',
+]
+let configChanged = false
+for (const key of previewVarKeys) {
+  if (deploymentEnv[key] !== undefined && config.vars?.[key] !== deploymentEnv[key]) {
+    config.vars ??= {}
+    config.vars[key] = String(deploymentEnv[key])
+    configChanged = true
+  }
+}
+if (String(deploymentEnv.BINFLARE_DISABLE_R2).toLowerCase() === 'true') {
+  config.r2_buckets = []
+  configChanged = true
+}
+
 const placeholderId = '00000000-0000-0000-0000-000000000000'
 const configuredId = config.d1_databases[0].database_id
 const effectiveId = databaseId ?? configuredId
@@ -147,6 +173,10 @@ if (!effectiveId || effectiveId === placeholderId) {
   console.warn('Using the placeholder database_id for dry-run validation.')
 } else if (databaseId && databaseId !== configuredId) {
   config.d1_databases[0].database_id = databaseId
+  configChanged = true
+}
+
+if (configChanged) {
   writeFileSync(configPath, `${JSON.stringify(config)}\n`)
 }
 

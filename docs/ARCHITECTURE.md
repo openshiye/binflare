@@ -111,11 +111,13 @@ D1 batch statements execute sequentially and non-concurrently in a transaction. 
 | `MAX_R2_CT_BASE64` | R2 base64 request cap; default 13400000 |
 | `RATE_LIMIT_WINDOW_SECONDS` | Fixed window; default 10 |
 | `RATE_LIMIT_MAX_REQUESTS` | Requests per window; default 1 |
+| `MAX_EXPIRE` | Optional expiry ceiling (`5min`–`never`); omitted means every protocol option |
+| `EXPIRE_DEFAULT` | Optional default expiry; must be within `MAX_EXPIRE` |
 | `TURNSTILE_SITE_KEY` | Public site key; empty disables Turnstile |
 | `TURNSTILE_SECRET` | Secret key; store with `wrangler secret put` |
 | `CORS_ORIGIN` | Optional origin for REST CORS; empty = same-origin |
 
-Cron: `*/15 * * * *`. D1 migrations live in `migrations/` and are applied with `wrangler d1 migrations apply`. Create the R2 bucket with `wrangler r2 bucket create binflare-pastes`.
+Cron: `*/15 * * * *`. D1 migrations live in `migrations/` and are applied with `wrangler d1 migrations apply`. Create the R2 bucket with `wrangler r2 bucket create binflare-pastes`. A private deployment can omit R2 with `BINFLARE_DISABLE_R2=true`; the Worker then reports the D1-only tier and `/setup` explains how to enable the larger tier.
 
 ## Performance notes
 
