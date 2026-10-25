@@ -6,7 +6,13 @@
   "main": "src/server.ts",
   "upload_source_maps": true,
   "observability": {
-    "enabled": true
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false
+    }
   },
   "assets": {
     "directory": "./dist/client",
