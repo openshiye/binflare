@@ -242,3 +242,7 @@ Binflare 是 PrivateBin 协议的 Cloudflare 重写版本。它是上游协议�
 ## 许可证
 
 Binflare 自身代码使用 MIT 许可证。见 [LICENSE](LICENSE) 与 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## 友链
+
+- [LINUX DO — 新的理想型社区](https://linux.do/)

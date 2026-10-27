@@ -260,3 +260,7 @@ Binflare is a Cloudflare-native rewrite of the PrivateBin protocol. It is a deri
 ## License
 
 Binflare's own code is MIT-licensed. See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## 友链
+
+- [LINUX DO — 新的理想型社区](https://linux.do/)
